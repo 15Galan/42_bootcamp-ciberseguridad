@@ -1,24 +1,51 @@
+import argparse
 import requests
 import bs4
+
+
 
 # PROBLEMA:
 # Crear un programa con una función llamada 'spider' que extraiga todas las imágenes de un sitio
 # web recursivamente, proporcionando una URL como parámetro y que gestione las siguientes opciones:
 # '-r': descarga de forma recursiva las imágenes de una URL.
-# '-r -l [n]': la acción de '-r', pero hasta 'n' niveles de profundidad.
+# '-l [n]': la acción de '-r', pero hasta 'n' niveles de profundidad.
 # '-p [path]': indica la ruta donde se guardarán los archivos descargados (si no se indica, se usará './data/').
 
+
 # ----------------------------------------------------------------------------------------------------------------------
+
 
 # Variables Globales (y sus valores por defecto).
 sitios_encontrados = set()      # Conjunto de URLs de sitios, sin repetir
 imagenes_encontradas = set()    # Conjunto de URLs de imágenes, sin repetir
 
 
+def inicializar_analizador():
+    # Analizador de los argumentos de la línea de comandos
+    analizador = argparse.ArgumentParser(
+        # prog="./spider",
+        description="Herramienta casera de Scraping de imágenes de un sitio web.",
+        epilog="Ejercicio 'arachnida' del Bootcamp de Ciberseguridad de la Fundación 42 (Málaga)."
+    )
+
+    # Agregar las opciones de la línea de comandos
+    analizador.add_argument("URL", help="URL del sitio web a 'scrapear'", type=str)
+    analizador.add_argument("-r", help="Indica que la búsqueda y descarga de imágenes será recursiva (por defecto L=5).", action="store_true")
+    analizador.add_argument("-l", help="Nivel de profundidad para la búsqueda y descarga de imágenes", type=int, default=5)
+    analizador.add_argument("-p", help="Ruta de la carpeta donde descargar las imágenes", type=str)
+    analizador.add_argument("-v", help="Muestra las URLs visitadas durante la ejecución", action="store_true")
+    analizador.add_argument("-e", help="Muestra las URLs fallidas y su error durante la ejecución", action="store_true")
+    analizador.add_argument("-o", help="Muestra las URLs visitadas ordenadas alfabéticamente al terminar", action="store_true")
+
+    # Obtener los argumentos de la línea de comandos
+    return analizador.parse_args()
+
+    return argumentos
+
 # TODO: renombrar a 'spider'
 # Extrae todas las URLs de otros sitios web, de un sitio web.
 # - URL:    URL del sitio web del que extraer los otros sitios web.
-def obtener_sitios(sitio_web):
+def extraer_sitios(sitio_web):
     # Obtener el contenido de la URL
     respuesta = requests.get(sitio_web)
 
@@ -39,7 +66,7 @@ def obtener_sitios(sitio_web):
 
 
 # Extrae todas las imágenes de un sitio web como URLs.
-def obtener_imagenes(sitios_web):
+def extraer_imagenes(sitios_web):
     # Solo si hay algún sitio web almacenado
     if sitios_web:
         for sitio in sitios_web:
@@ -77,23 +104,37 @@ def compatible(url):
 
 # ----------------------------------------------------------------------------------------------------------------------
 
+
 if __name__ == "__main__":
-    # TODO: pedir datos al usuario
-    url = "https://google.com"
-    nivel = 0
+    global url, nivel, carpeta, verbose, errores, orden
 
-    sitios_encontrados.add(url)  # Añadir el sitio inicial
+    # Inicializar el analizador de la línea de comandos
+    args = inicializar_analizador()
 
-    print("URL inicial: " + url)
-    print("Nivel (dft): " + str(nivel))
+    # Obtener los argumentos del comando
+    url = args.URL
+    rec = args.r
+    nivel = args.l
+    verbose = args.v
+    errores = args.e
+    orden = args.o
 
-    obtener_sitios(url)
+    # Si se indica la carpeta, se usa;
+    # si no, se usa la ruta por defecto
+    if args.p:
+        carpeta = args.p
 
-    print("\nSitios encontrados:")
-    for url in sorted(sitios_encontrados):
-        print(url)
+    else:
+        carpeta = "./data/"
 
-    obtener_imagenes(sitios_encontrados)
+    # Extraer todas las URLs necesarias
+    print("Analizando las páginas...")
+    extraer_sitios(url, 0)
+
+    if orden:
+        print("Resumen de la búsqueda:")
+        for sitio in sorted(sitios_encontrados):
+            print(sitio)
 
     print("\nImágenes encontradas:")
     for url in sorted(imagenes_encontradas):
