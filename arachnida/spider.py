@@ -1,5 +1,6 @@
 import argparse
 import requests
+import os
 
 from bs4 import BeautifulSoup as sopa
 from urllib.parse import urlparse
@@ -33,7 +34,7 @@ def inicializar_analizador():
     analizador.add_argument("URL", help="URL del sitio web a 'scrapear'", type=str)
     analizador.add_argument("-r", help="Indica que la búsqueda y descarga de imágenes será recursiva (por defecto L=5).", action="store_true")
     analizador.add_argument("-l", help="Nivel de profundidad para la búsqueda y descarga de imágenes", type=int, default=5)
-    analizador.add_argument("-p", help="Ruta de la carpeta donde descargar las imágenes", type=str)
+    analizador.add_argument("-p", help="Ruta de la carpeta donde descargar las imágenes", type=str, default="./data/")
     analizador.add_argument("-v", help="Muestra las URLs visitadas durante la ejecución", action="store_true")
     analizador.add_argument("-e", help="Muestra las URLs fallidas y su error durante la ejecución", action="store_true")
     analizador.add_argument("-o", help="Muestra las URLs visitadas ordenadas alfabéticamente al terminar", action="store_true")
@@ -49,7 +50,7 @@ def inicializar_analizador():
 def extraer_sitios(sitio_web, niv):
     try:
         # Obtener el contenido de la URL
-        respuesta = requests.get(sitio_web)
+        respuesta = requests.get(sitio_web, timeout=5)
 
         # Código 200: petición exitosa
         if respuesta.status_code == 200:
@@ -85,26 +86,34 @@ def extraer_sitios(sitio_web, niv):
 
 # Extrae todas las imágenes de un sitio web como URLs.
 def extraer_imagenes(sitios_web):
-    # Solo si hay algún sitio web almacenado    # TODO: eliminar comprobación
-    if sitios_web:
-        for sitio in sitios_web:
+    for sitio in sitios_web:
+        try:
             # Obtener el contenido de la URL
-            respuesta = requests.get(sitio)
+            respuesta = requests.get(sitio, timeout=5)
 
             # Convertir el contenido a un objeto XML
             xml = sopa(respuesta.content, "html.parser")
 
             # Obtener todos los elementos <img> del XML
-            url_imagenes = xml.find_all("img")
+            enlaces = xml.find_all("img")
 
             # Recorrer todos los elementos <img>
-            for url in url_imagenes:
+            for enlace in enlaces:
                 # Obtener la URL de la imagen
-                imagen = url.get("src")
+                esquema, dominio, ruta = formatear(sitio, enlace.get("src"))
+                url = esquema + "://" + dominio + ruta
 
                 # Añadir la imagen si no está repetida
-                if imagen not in imagenes_encontradas and compatible(imagen):
-                    imagenes_encontradas.add(imagen)
+                if url not in imagenes_encontradas and compatible(url):
+                    imagenes_encontradas.add(url)
+
+                    # Mostrar la imagen encontrada
+                    if verbose:
+                        print(url)
+
+        except Exception as excepcion:
+            if errores:
+                print(excepcion.args)
 
 
 # Indica si una URL corresponde a un archivo de algún tipo disponible.
@@ -152,6 +161,32 @@ def formatear(anterior, siguiente):
     return esquema, dominio, ruta
 
 
+# Descarga las imágenes recibidas como parámetro en la
+# carpeta indicada en los argumentos de la línea de comandos.
+def descargar_imagenes(imagenes, carpeta):
+    for imagen in imagenes:
+        try:
+            # Obtener el contenido de la URL
+            respuesta = requests.get(imagen, timeout=5)
+
+            # Código 200: petición exitosa
+            if respuesta.status_code == 200:
+                # Obtener el nombre del archivo
+                nombre = imagen.split("/")[-1]
+
+                # Crear la carpeta si no existe
+                if not os.path.exists(carpeta):
+                    os.makedirs(carpeta)
+
+                # Guardar el archivo en la carpeta indicada
+                with open(carpeta + "/" + nombre, "wb") as archivo:
+                    archivo.write(respuesta.content)
+
+        except Exception as excepcion:
+            if errores:
+                print(excepcion.args)
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 
@@ -163,33 +198,38 @@ if __name__ == "__main__":
 
     # Obtener los argumentos del comando
     url = args.URL
-    rec = args.r
     nivel = args.l
+    carpeta = args.p
+    rec = args.r
     verbose = args.v
     errores = args.e
     orden = args.o
 
-    # Si se indica la carpeta, se usa;
-    # si no, se usa la ruta por defecto
-    if args.p:
-        carpeta = args.p
-
-    else:
-        carpeta = "./data/"
 
     # Extraer todas las URLs necesarias
     print("Analizando las páginas...")
+
+    if not rec:
+        nivel = 0   # No seguir recursivamente
+
     extraer_sitios(url, 0)
 
+    # Extraer las imágenes de las URLs anteriores
+    print("Extrayendo imágenes...")
+    extraer_imagenes(sitios_encontrados)
+
+    # Descargar las imágenes anteriores
+    print("Descargando imágenes...")
+    descargar_imagenes(imagenes_encontradas, carpeta)
+
+    # Mostrar las consultas ordenadas alfabéticamente
     if orden:
         print("Resumen de la búsqueda:")
+
         for sitio in sorted(sitios_encontrados):
             print(sitio)
 
-    # Extraer las imágenes de las URLs anteriores
-    # print("Extrayendo imágenes...")
-    # extraer_imagenes(sitios_encontrados)
+        print("\nResumen de las imágenes:")
 
-    # Descargar las imágenes anteriores
-    # print("Descargando imágenes...")
-    # descargar_imagenes(imagenes_encontradas)
+        for imagen in sorted(imagenes_encontradas):
+            print(imagen)
