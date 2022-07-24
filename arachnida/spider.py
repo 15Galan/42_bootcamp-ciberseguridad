@@ -1,7 +1,8 @@
 import argparse
 import requests
-import bs4
 
+from bs4 import BeautifulSoup as sopa
+from urllib.parse import urlparse
 
 
 # PROBLEMA:
@@ -40,41 +41,58 @@ def inicializar_analizador():
     # Obtener los argumentos de la línea de comandos
     return analizador.parse_args()
 
-    return argumentos
 
 # TODO: renombrar a 'spider'
 # Extrae todas las URLs de otros sitios web, de un sitio web.
 # - URL:    URL del sitio web del que extraer los otros sitios web.
-def extraer_sitios(sitio_web):
-    # Obtener el contenido de la URL
-    respuesta = requests.get(sitio_web)
+# - niv:    Nivel de profundidad actual de la búsqueda.
+def extraer_sitios(sitio_web, niv):
+    try:
+        # Obtener el contenido de la URL
+        respuesta = requests.get(sitio_web)
 
-    # Convertir el contenido a un objeto XML
-    xml = bs4.BeautifulSoup(respuesta.content, "html.parser")
+        # Código 200: petición exitosa
+        if respuesta.status_code == 200:
+            # Convertir el contenido a un objeto XML
+            xml = sopa(respuesta.content, "html.parser")
 
-    # Obtener todos los elementos <a> del XML
-    enlaces = xml.find_all("a")
+            # Obtener todos los elementos <a> del XML (URLs)
+            enlaces = xml.find_all("a")
 
-    # Recorremos todos los elementos <a>
-    for enlace in enlaces:
-        # Obtener la URL del sitio
-        url = enlace.get("href")
+            # Recorremos todos los elementos <a>
+            for enlace in enlaces:
+                # Obtener la URL del sitio
+                esquema, dominio, ruta = formatear(sitio_web, enlace.get("href"))
+                url = esquema + "://" + dominio + ruta
 
-        # Añadir el sitio si no está repetido
-        if url not in sitios_encontrados:
-            sitios_encontrados.add(url)
+                # Añadir el sitio si no está repetido
+                if url not in sitios_encontrados:
+                    sitios_encontrados.add(url)
+
+                    # Mostrar el sitio web encontrado
+                    if verbose:
+                        print("   " * niv, url)     # Se usan espacios para indentar
+
+                    # Recursividad: extraer los otros sitios web
+                    # si aún no se alcanzó la profundidad indicada
+                    if niv < nivel:
+                        extraer_sitios(url, niv + 1)
+
+    except Exception as excepcion:
+        if errores:
+            print(niv, excepcion.args)
 
 
 # Extrae todas las imágenes de un sitio web como URLs.
 def extraer_imagenes(sitios_web):
-    # Solo si hay algún sitio web almacenado
+    # Solo si hay algún sitio web almacenado    # TODO: eliminar comprobación
     if sitios_web:
         for sitio in sitios_web:
             # Obtener el contenido de la URL
             respuesta = requests.get(sitio)
 
             # Convertir el contenido a un objeto XML
-            xml = bs4.BeautifulSoup(respuesta.content, "html.parser")
+            xml = sopa(respuesta.content, "html.parser")
 
             # Obtener todos los elementos <img> del XML
             url_imagenes = xml.find_all("img")
@@ -100,6 +118,38 @@ def compatible(url):
             return True
 
     return False
+
+
+# Recibe una URL visitada y una URL a visitar, corrigiendo esta última
+# si está mal formada, usando o no los datos de la URL visitada.
+def formatear(anterior, siguiente):
+    anterior = urlparse(anterior)   # Actualizar la variable (URL anterior en componentes)
+    siguiente = urlparse(siguiente) # Actualizar la variable (URL siguiente en componentes)
+
+    # Componentes de la URL siguiente
+    esquema, dominio, ruta, fragmento = siguiente.scheme, siguiente.netloc, siguiente.path, siguiente.fragment
+
+    # Si la URL siguiente no tiene esquema, se le asigna el mismo que la URL anterior (es una subpágina)
+    if esquema == "":
+        esquema = anterior.scheme
+
+    # Si la URL siguiente no tiene dominio, se le asigna el mismo que la URL anterior (es una subpágina)
+    if dominio == "":
+        dominio = anterior.netloc
+
+    # Si la URL siguiente no tiene "www.", se le añade (puramente estético)
+    elif not dominio.startswith("www."):
+        dominio = "www." + dominio
+
+    # Si la URL siguiente no tiene ruta, se le asigna la misma que la URL anterior (es una subpágina)
+    if ruta == "" or ruta == "/":
+        ruta = anterior.path
+
+    # Si la URL siguiente tiene un fragmento, las URL anterior y siguiente son la misma
+    if fragmento != "":
+        ruta = ""
+
+    return esquema, dominio, ruta
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -136,6 +186,10 @@ if __name__ == "__main__":
         for sitio in sorted(sitios_encontrados):
             print(sitio)
 
-    print("\nImágenes encontradas:")
-    for url in sorted(imagenes_encontradas):
-        print(url)
+    # Extraer las imágenes de las URLs anteriores
+    # print("Extrayendo imágenes...")
+    # extraer_imagenes(sitios_encontrados)
+
+    # Descargar las imágenes anteriores
+    # print("Descargando imágenes...")
+    # descargar_imagenes(imagenes_encontradas)
