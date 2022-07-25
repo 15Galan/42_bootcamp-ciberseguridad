@@ -22,6 +22,7 @@ sitios_encontrados = set()      # Conjunto de URLs de sitios, sin repetir
 imagenes_encontradas = set()    # Conjunto de URLs de imágenes, sin repetir
 
 
+# Inicializa el parser de argumentos de la línea de comandos.
 def inicializar_analizador():
     # Analizador de los argumentos de la línea de comandos
     analizador = argparse.ArgumentParser(
@@ -43,7 +44,6 @@ def inicializar_analizador():
     return analizador.parse_args()
 
 
-# TODO: renombrar a 'spider'
 # Extrae todas las URLs de otros sitios web, de un sitio web.
 # - URL:    URL del sitio web del que extraer los otros sitios web.
 # - niv:    Nivel de profundidad actual de la búsqueda.
@@ -118,7 +118,7 @@ def extraer_imagenes(sitios_web):
 
 # Indica si una URL corresponde a un archivo de algún tipo disponible.
 def compatible(url):
-    extensiones = ["jpg", "jpeg", "png", "bmp"]
+    extensiones = ["jpg", "jpeg", "png", "gif", "bmp", "docx", "pdf"]
 
     # Comprobar si el final de la URL recibida (extensión del
     # archivo) coincide con alguno de los formatos disponibles
@@ -209,10 +209,12 @@ if __name__ == "__main__":
     # Extraer todas las URLs necesarias
     print("Analizando las páginas...")
 
-    if not rec:
-        nivel = 0   # No seguir recursivamente
+    if rec:
+        extraer_sitios(url, 0)          # Extraer todos los sitios web
 
-    extraer_sitios(url, 0)
+    else:
+        sitios_encontrados.add(url)     # Añadir solamente la URL inicial
+
 
     # Extraer las imágenes de las URLs anteriores
     print("Extrayendo imágenes...")
