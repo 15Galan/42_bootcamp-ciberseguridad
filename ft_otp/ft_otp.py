@@ -1,6 +1,11 @@
 import argparse
+import hashlib
+import hmac
+import math
 import re
 import os
+
+from datetime import datetime as tiempo
 
 
 """
@@ -83,6 +88,33 @@ def validar_fichero(fichero):
         return False
 
     return True
+
+
+# Generar una contraseña temporal usando una clave secreta hexadecimal.
+# - secreto: clave hexadecimal secreta de la que extraer un OTP.
+def generar_OTP(secreto):
+    # Obtener y truncar el tiempo actual a una ventana de 30 segundos.
+    tiempo_actual = math.floor(tiempo.now().timestamp() / 30)
+
+    # Generar el hash de la clave secreta (bytes).
+    hashbytes = hmac.digest(secreto.encode(), str(tiempo_actual).encode(), hashlib.sha1)
+
+    # Obtener el offset.
+    offset = hashbytes[19] & 15
+
+    # Obtener el valor de la contraseña.
+    contra = 0
+    contra |= (hashbytes[offset] & 15) << 24
+    contra |= (hashbytes[offset + 1] & 255) << 16
+    contra |= (hashbytes[offset + 2] & 255) << 8
+    contra |= (hashbytes[offset + 3] & 255)
+
+    # TODO: explicar el proceso anterior.
+
+    # Obtener el valor de la contraseña.
+    contra = (contra & 0x7FFFFFFF) % 1000000
+
+    return contra
 
 
 # ----------------------------------------------------------------------------------------------------------------------
