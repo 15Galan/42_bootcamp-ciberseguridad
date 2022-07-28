@@ -6,6 +6,7 @@ import re
 import os
 
 from datetime import datetime as tiempo
+from cripta import Cripta as AES
 
 
 """
@@ -132,7 +133,14 @@ if __name__ == "__main__":
 
         print("Clave almacenada en 'ft_otp.key'.")
 
-        # TODO: cifrar el fichero '.key' con una clave aleatoria.
+        try:
+            # Cifrar el fichero con la clave.
+            AES().cifrar_fichero("ft_otp.key")
+
+            print("Fichero 'ft_otp.key' cifrado con contraseña.")
+
+        except Exception as e:
+            print("Error: " + str(e))
 
     # Si se solicitó generar una contraseña (-k).
     elif fichero_cifrado:
