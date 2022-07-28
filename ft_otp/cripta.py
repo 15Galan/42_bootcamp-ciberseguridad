@@ -93,3 +93,15 @@ class Cripta:
 
         # Texto escrito en el fichero.
         return claro
+
+    # Lee el contenido de un fichero cifrado.
+    def leer_fichero(self, fichero):
+        # Leer el contenido del fichero.
+        with open(fichero, "rb") as f:
+            contenido = f.read()
+
+        # Descifrar el contenido del fichero.
+        claro = self.descifrar(contenido)
+
+        # Texto escrito en el fichero.
+        return claro
