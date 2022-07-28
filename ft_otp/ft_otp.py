@@ -144,6 +144,19 @@ if __name__ == "__main__":
 
     # Si se solicitó generar una contraseña (-k).
     elif fichero_cifrado:
-        # TODO: Generar una contraseña temporal.
-        pass
+        # Verificar que el fichero cifrado existe y es legible.
+        if not (os.path.isfile(fichero_cifrado) or os.access(fichero_cifrado, os.R_OK)):
+            print("Error: El fichero no existe o no es legible.")
+
+            exit(1)
+
+        else:
+            # Extraer la clave del interior del fichero.
+            clave = AES().leer_fichero(fichero_cifrado)
+
+            # Generar el OTP.
+            contra = generar_OTP(clave)
+
+            # Mostrar la contraseña.
+            print(contra)
     
