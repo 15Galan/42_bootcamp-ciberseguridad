@@ -1,3 +1,4 @@
+import qrcode_terminal
 import argparse
 import hashlib
 import struct
@@ -27,7 +28,7 @@ def leer_argumentos():
     # Inicializar el analizador de argumentos.
     analizador = inicializar_analizador()
 
-    return analizador.g, analizador.k
+    return analizador.g, analizador.k, analizador.qr
 
 
 # Inicializar el parser de la línea de comandos.
@@ -50,11 +51,10 @@ def inicializar_analizador():
         metavar="fichero",
         help="genera una contraseña temporal usando un fichero y la muestra por pantalla.",
         type=str)
-    # analizador.add_argument(
-    #     "-t",
-    #     metavar="segundos",
-    #     help="indica el tiempo de caducidad de las contraseñas generadas.",
-    #     default=int)
+    analizador.add_argument(
+        "-qr",
+        help="muestra un QR con la clave secreta.",
+        action="store_true")
 
     # Obtener los argumentos de la línea de comandos.
     return analizador.parse_args()
@@ -125,7 +125,7 @@ def generar_OTP(clave):
 
 if __name__ == "__main__":
     # Leer los argumentos de la línea de comandos.
-    fichero_clave_compartida, fichero_cifrado = leer_argumentos()
+    fichero_clave_compartida, fichero_cifrado, qr = leer_argumentos()
 
     # Si se solicitó generar una clave (-g).
     if fichero_clave_compartida and validar_fichero(fichero_clave_compartida):
@@ -156,6 +156,10 @@ if __name__ == "__main__":
             # Extraer la clave del interior del fichero.
             clave = AES().leer_fichero(fichero_cifrado)
 
-            # Generar el OTP y mostrar el código.
-            print(generar_OTP(clave))
-    
+            # Mostrar un QR con la clave secreta si se indicó.
+            if qr:
+                print("\nQR con la clave secreta:")
+                qrcode_terminal.draw(clave)
+
+            # Generar y mostrar el código OTP.
+            print("Código generado:", generar_OTP(clave))
