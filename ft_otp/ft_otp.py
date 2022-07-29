@@ -1,11 +1,11 @@
 import argparse
 import hashlib
+import struct
 import hmac
-import math
+import time
 import re
 import os
 
-from datetime import datetime as tiempo
 from cripta import Cripta as AES
 
 
@@ -91,31 +91,33 @@ def validar_fichero(fichero):
     return True
 
 
-# Generar una contraseña temporal usando una clave secreta hexadecimal.
+# Generar un código temporal usando una clave secreta hexadecimal.
 # - secreto: clave hexadecimal secreta de la que extraer un OTP.
-def generar_OTP(secreto):
-    # Obtener y truncar el tiempo actual a una ventana de 30 segundos.
-    tiempo_actual = math.floor(tiempo.now().timestamp() / 30)
+def generar_OTP(clave):
 
-    # Generar el hash de la clave secreta (bytes).
-    hashbytes = hmac.digest(secreto.encode(), str(tiempo_actual).encode(), hashlib.sha1)
+    # Codificar la clave hexadecimal en una cadena de bytes.
+    clave_b = bytes.fromhex(clave)
+
+    # Obtener y truncar el tiempo actual a una "ventana" de 30 segundos.
+    tiempo = int(time.time() // 30)
+
+    # Codificar el tiempo en una cadena de bytes.
+    tiempo_b = struct.pack(">Q", tiempo)
+
+    # Generar el hash de la clave secreta (como cadena de bytes).
+    hash_b = hmac.digest(clave_b, tiempo_b, hashlib.sha1)
 
     # Obtener el offset.
-    offset = hashbytes[19] & 15
+    offset = hash_b[19] & 15    # Operación AND entre '0b????' y '0b1111'.
 
-    # Obtener el valor de la contraseña.
-    contra = 0
-    contra |= (hashbytes[offset] & 15) << 24
-    contra |= (hashbytes[offset + 1] & 255) << 16
-    contra |= (hashbytes[offset + 2] & 255) << 8
-    contra |= (hashbytes[offset + 3] & 255)
+    # Generar el código.
+    codigo = struct.unpack('>I', hash_b[offset:offset + 4])[0]
+    codigo = (codigo & 0x7FFFFFFF) % 1000000
 
     # TODO: explicar el proceso anterior.
 
-    # Obtener el valor de la contraseña.
-    contra = (contra & 0x7FFFFFFF) % 1000000
-
-    return contra
+    # Devolver los 6 primeros dígitos del código.
+    return "{:06d}".format(codigo)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -154,9 +156,6 @@ if __name__ == "__main__":
             # Extraer la clave del interior del fichero.
             clave = AES().leer_fichero(fichero_cifrado)
 
-            # Generar el OTP.
-            contra = generar_OTP(clave)
-
-            # Mostrar la contraseña.
-            print(contra)
+            # Generar el OTP y mostrar el código.
+            print(generar_OTP(clave))
     
