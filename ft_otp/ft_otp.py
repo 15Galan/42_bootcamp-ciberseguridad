@@ -53,8 +53,9 @@ def inicializar_analizador():
         type=str)
     analizador.add_argument(
         "-qr",
+        metavar="fichero",
         help="muestra un QR con la clave secreta.",
-        action="store_true")
+        type=str)
 
     # Obtener los argumentos de la línea de comandos.
     return analizador.parse_args()
@@ -144,22 +145,28 @@ if __name__ == "__main__":
         except Exception as e:
             print("Error: " + str(e))
 
-    # Si se solicitó generar una contraseña (-k).
-    elif fichero_cifrado:
+    # Si se solicitó generar un código temporal (-k) o mostrar el QR de la clave (-qr).
+    elif fichero_cifrado or qr:
+        # Usar el fichero recibido por una de las dos opciones.
+        fichero = fichero_cifrado if fichero_cifrado else qr    # El fichero usado es el mismo, pero no se recibe igual
+
         # Verificar que el fichero cifrado existe y es legible.
-        if not (os.path.isfile(fichero_cifrado) or os.access(fichero_cifrado, os.R_OK)):
+        if not (os.path.isfile(fichero) or os.access(fichero, os.R_OK)):
             print("Error: El fichero no existe o no es legible.")
 
             exit(1)
 
         else:
             # Extraer la clave del interior del fichero.
-            clave = AES().leer_fichero(fichero_cifrado)
+            clave = AES().leer_fichero(fichero)
 
-            # Mostrar un QR con la clave secreta si se indicó.
-            if qr:
-                print("\nQR con la clave secreta:")
+            # Si se solicitó generar una contraseña (-k).
+            if fichero_cifrado:
+                # Generar y mostrar el código OTP.
+                print("Código generado:", generar_OTP(clave))
+
+            # Si se solicitó generar un QR (-qr).
+            else:
+                # Generar y mostrar el QR.
+                print("QR con la clave secreta:")
                 qrcode_terminal.draw(clave)
-
-            # Generar y mostrar el código OTP.
-            print("Código generado:", generar_OTP(clave))
