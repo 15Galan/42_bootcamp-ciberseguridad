@@ -129,21 +129,23 @@ if __name__ == "__main__":
     fichero_clave_compartida, fichero_cifrado, qr = leer_argumentos()
 
     # Si se solicitó generar una clave (-g).
-    if fichero_clave_compartida and validar_fichero(fichero_clave_compartida):
-        # Almacenar la clave en un fichero '.key'.
-        with open("ft_otp.key", "w") as f:
-            f.write(clave)
+    if fichero_clave_compartida:
+        if validar_fichero(fichero_clave_compartida):   # No uso AND con la de arriba para que detecte error con '-g'
+            # Almacenar la clave en un fichero '.key'.
+            with open("ft_otp.key", "w") as f:
+                f.write(clave)
 
-        print("Clave almacenada en 'ft_otp.key'.")
+            print("Clave almacenada en 'ft_otp.key'.")
 
-        try:
             # Cifrar el fichero con la clave.
             AES().cifrar_fichero("ft_otp.key")
 
             print("Fichero 'ft_otp.key' cifrado con contraseña.")
 
-        except Exception as e:
-            print("Error: " + str(e))
+        else:
+            # Los errores del fichero de la clave se tratan en 'validar_fichero()'.
+            exit(1)
+
 
     # Si se solicitó generar un código temporal (-k) o mostrar el QR de la clave (-qr).
     elif fichero_cifrado or qr:
@@ -170,3 +172,7 @@ if __name__ == "__main__":
                 # Generar y mostrar el QR.
                 print("QR con la clave secreta:")
                 qrcode_terminal.draw(clave)
+
+    else:
+        print("No se ha especificado ninguna opción.")
+        exit(1)

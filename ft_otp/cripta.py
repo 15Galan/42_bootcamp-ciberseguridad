@@ -35,11 +35,12 @@ class Cripta:
     # Cifra un texto usando AES en modo CBC con vector de inicialización IV.
     def cifrar(self, texto_claro):
         # Pedir una clave al usuario.
-        self.CLAVE = getpass("Introduce una clave: ").encode("utf-8")
+        self.CLAVE = getpass("Introduce una contraseña: ").encode("utf-8")
 
         # Validar longitud de la clave.
         if len(self.CLAVE) != 16:
-            raise Exception("La clave debe tener 16 bytes (caracteres).")
+            print("La clave debe ser de 16 caracteres.")
+            exit(1)
 
         # Mecanismo de cifrado.
         cifrador = AES.new(self.CLAVE, AES.MODE_CBC, self.IV)
@@ -50,17 +51,23 @@ class Cripta:
     # Descifra un texto cifrado usando AES en modo CBC con un vector de inicialización IV.
     def descifrar(self, texto_oculto):
         # Pedir una clave al usuario.
-        self.CLAVE = getpass("Introduce la clave: ").encode("utf-8")
+        self.CLAVE = getpass("Introduce la contraseña: ").encode("utf-8")
 
         # Validar longitud de la clave.
         if len(self.CLAVE) != 16:
-            raise Exception("La clave debe tener 16 bytes (caracteres).")
+            print("La clave debe ser de 16 caracteres.")
+            exit(1)
 
-        # Mecanismo de descifrado.
-        descifrador = AES.new(self.CLAVE, AES.MODE_CBC, self.IV)
+        try:
+            # Mecanismo de descifrado.
+            descifrador = AES.new(self.CLAVE, AES.MODE_CBC, self.IV)
 
-        # Desciframos, eliminamos el padding, y recuperamos la cadena
-        return unpad(descifrador.decrypt(texto_oculto), self.BLOQUE).decode("utf-8", "ignore")
+            # Desciframos, eliminamos el padding, y recuperamos la cadena
+            return unpad(descifrador.decrypt(texto_oculto), self.BLOQUE).decode("utf-8", "ignore")
+
+        except:
+            print("Contraseña incorrecta.")
+            exit(1)
 
     # Cifra un fichero usando AES en modo CBC con un vector de inicialización IV.
     def cifrar_fichero(self, fichero):
