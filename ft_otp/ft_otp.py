@@ -112,12 +112,25 @@ def generar_OTP(clave):
     offset = hash_b[19] & 15    # Operación AND entre '0b????' y '0b1111'.
 
     # Generar el código.
-    codigo = struct.unpack('>I', hash_b[offset:offset + 4])[0]
+    codigo = struct.unpack('>I', hash_b[offset:offset + 4])[0]      # '[0]' porque 'struct.unpack' devuelve una lista.
     codigo = (codigo & 0x7FFFFFFF) % 1000000
 
-    # TODO: explicar el proceso anterior.
+    """
+    Generar un Valor HTOP (en este caso de 6 dígitos).
+    1. Generar un valor HMAC-SHA1.
+        -   Usando el valor de la clave y el valor del tiempo actual.
+        -   Será un 'str' de 20 bytes.
+    2. Generar un 'str' de 4 bytes ("Truncamiento Dinámico").
+        -   Usando el valor HMAC-SHA1 anterior.
+        -   Será un 'str' de 4 bytes a partir del byte 'hash[offset]'.
+    3. Computar el Valor HTOP.
+        -   Convertir el 'str' anterior a un entero.
+        -   Aplicarle módulo 10^'d', siendo 'd' la cantidad de dígitos (en este caso d = 6).
+    
+    * Extraído de la sección 5.3 del RFC 4226.
+    """
 
-    # Devolver los 6 primeros dígitos del código.
+    # Devolver el código como 'str'.
     return "{:06d}".format(codigo)
 
 
