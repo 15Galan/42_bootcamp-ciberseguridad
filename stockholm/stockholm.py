@@ -5,7 +5,11 @@ from cryptography.fernet import Fernet
 
 
 # PROBLEMA:
-# TODO: definir el problema.
+# Crear un programa llamado 'stockholm' capaz de cifrar y descifrar ficheros.
+# -r <clave>: revierte la infección usando la clave de cifrado.
+# -v: muestra la versión del programa.
+# -s: desactiva la información mostrada por pantalla.
+# Si no se especifica ninguna opción, el programa cifra todos los ficheros de la carpeta del script.
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -85,6 +89,7 @@ def validar_fichero(elemento, modo):
 
         else:
             print("Error: modo inexistente de validación de fichero.")
+            print("Formatos aceptados: 'c' (cifrado) o 'd' (descifrado).")
             exit(1)
 
     return False
@@ -139,25 +144,31 @@ def liberar():
         if validar_fichero(elemento, "d"):
             ficheros.append(elemento)
 
-    if not silencio:
-        print("Ficheros:", sorted(ficheros))
-
     # Leer la clave de cifrado.
     with open("clave.key", "rb") as f:
         clave = f.read()
 
     # Descifrar los ficheros obtenidos anteriormente.
     for fichero in ficheros:
-        # Extraer y descifrar el contenido del fichero.
-        with open(fichero, "rb") as f:
-            descifrado = Fernet(clave).decrypt(f.read())
+        try:
+            # Extraer y descifrar el contenido del fichero.
+            with open(fichero, "rb") as f:
+                descifrado = Fernet(clave).decrypt(f.read())
 
-        # Escribir el contenido descifrado del fichero.
-        with open(fichero, "wb") as f:
-            f.write(descifrado)
+            # Escribir el contenido descifrado del fichero.
+            with open(fichero, "wb") as f:
+                f.write(descifrado)
 
-        # Renombrar el fichero cifrado
-        os.rename(fichero, fichero[:-3])    # '[:-3]' para el devolver el nombre hasta el '.ft' que mide 3 caracteres.
+            # Renombrar el fichero cifrado
+            os.rename(fichero, fichero[:-3])    # '[:-3]' para el devolver el nombre hasta el '.ft' que mide 3 caracteres.
+
+        # Si se intenta descifrar un fichero que no ha sido cifrado (es '.ft' sin extensión original).
+        except Exception as e:
+            # Extraer el fichero de la lista de ficheros descifrados.
+            ficheros.remove(fichero)
+
+    if not silencio and ficheros:
+        print("Ficheros:", sorted(ficheros))
 
     # Devuelve la cantidad de ficheros descifrados.
     return len(ficheros)
