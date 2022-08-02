@@ -294,7 +294,13 @@ if __name__ == "__main__":
 
     # Se solicitó descifrar los ficheros (-r).
     elif revertir:
-        liberar(carpeta)    # Se solicitó una 'carpeta' donde descifrar (-p).
+        # Verificar que existe la clave.
+        if os.path.exists("clave.key"):
+           liberar(carpeta)    # Se solicitó una 'carpeta' donde descifrar (-p).
+
+        else:
+            if not silencio:
+                print("Error GRAVE: no se encontró el fichero 'clave.key'.")
 
     # Se solicitó cifrar los ficheros (ninguna opción).
     else:
