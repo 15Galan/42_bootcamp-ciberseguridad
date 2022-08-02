@@ -12,6 +12,7 @@ Al tratarse de un script, **no es necesario compilarlo**.
 - Solo busca ficheros a cifrar en la carpeta `/home/usuario/infection`.
 - Las extensiones a cifrar serán las mismas [extensiones](https://gist.github.com/xpn/facb5692980c14df272b16a4ee6a29d5) que cifró WannaCry.
 - Los ficheros descifrados se mantendrán en la carpeta original o se moverán a una especificada (solo los descifrados).
+- Tras cifrar los archivos, la clave de cifrado se almacena en `clave.key`, en la ruta de `stockholm.py`, para usarla con la opción `-r` al descifrar.
 
 ## Manual de usuario
 ### Funcionamiento
