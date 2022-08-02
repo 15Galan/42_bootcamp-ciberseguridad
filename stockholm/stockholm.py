@@ -308,8 +308,9 @@ if __name__ == "__main__":
         if os.path.exists(infectorio):
             secuestrar()
 
-        elif not silencio:
-            print("Error: no existe la carpeta '{}'.".format(infectorio))
+        else:
+            if not silencio:
+                print("Error: no existe la carpeta '{}'.".format(infectorio))
 
         """
         Decido no crear la carpeta si no existe, porque debe contener ficheros.
