@@ -96,7 +96,7 @@ def tratar_fechas(inicio, final):
             inicio = ahora - datetime.timedelta(days=30)    # Valor por defecto
             final = ahora
 
-            print('No se indicaron fechas. Se usará ranto por defecto: 30 días atrás.\n')
+            print('No se indicaron fechas. Se usará rango por defecto: 30 días atrás.\n')
 
         else:
             inicio = datetime.datetime.strptime(inicio, '%d-%m-%Y')
@@ -160,6 +160,30 @@ def programas_abiertos(inicio, final):
     return None
 
 
+def ficheros(ruta, extension):
+    """
+    Lista los ficheros de una ruta, incluidos subdirectorios.
+
+    :param ruta: Ruta del directorio.
+    :param extension: Extensión de los ficheros a listar.
+
+    :return: Lista de ficheros.
+    """
+
+    # Lista de ficheros.
+    lista = []
+
+    # Listar los ficheros de la ruta.
+    for ruta, _, ficheros in os.walk(ruta):
+
+        # Comprobar que el fichero tiene la extensión indicada.
+        for fichero in ficheros:
+            if fichero.endswith("." + extension):
+                lista.append(os.path.join(ruta, fichero))       # Añadir el fichero a la lista.
+
+    return lista
+
+
 def programas_instalados(inicio, final):
     """
     Obtiene los programas instalados en un rango de fechas.
@@ -170,19 +194,18 @@ def programas_instalados(inicio, final):
     :return: Lista de programas instalados.
     """
 
-    # Lista de programas instalados.
-    programas = []
+    # TODO: revisar, ¿se puede considerar un '.exe' como un programa?
 
-    # Listar los programas instalados en la fecha 'inicio' o posterior.
-    for programa in conexion.Win32_Product():
-        # Interpretar la fecha como 'DD-MM-AAAA'.
-        fecha = datetime.datetime.strptime(programa.InstallDate, '%Y%m%d').date()
+    # Conjunto de programas instalados.
+    programas = set()
 
-        # Comprobar que la fecha está en el rango de fechas.
-        if inicio.date() <= fecha <= final.date():
-            programas.append(programa.Name)
+    # Listar todos los ficheros ejecutables del sistema.
+    for fichero in ficheros('C:\\', 'exe'):
+        fecha = datetime.datetime.fromtimestamp(os.path.getctime(fichero))      # Obtener la fecha de creación.
 
-            # print("{0} :\t{1}\t{2}\t{3}".format(fecha, programa.Caption, programa.Version, programa.Vendor))
+        # Comprobar que el fichero se creó en el rango de fechas.
+        if inicio <= fecha <= final:
+            programas.add(fichero)      # Añadir el fichero al conjunto
 
     return programas
 
