@@ -81,24 +81,49 @@ def tratar_fechas(inicio, final):
     try:
         # Comprobar los argumentos recibidos.
         if inicio and not final:
+            """
+            No se indicó la fecha final, así que se interpreta como la fecha actual.
+            """
+
             inicio = datetime.datetime.strptime(inicio, '%d-%m-%Y')
             final = datetime.datetime.now()
 
         elif not inicio and final:
+            """
+            No se indicó la fecha inicial, así que se interpreta como la fecha 0 (01-01-2970).
+            """
+
             inicio = datetime.datetime.fromtimestamp(0)
             final = datetime.datetime.strptime(final, '%d-%m-%Y')
 
         elif not inicio and not final:
+            """
+            No se indicó ninguna fecha, así que se interpretan 'desde hace un mes hasta hoy'.
+            'Un mes' es mi elección como rango por defecto.
+            """
+
             # Fecha de ejecución del programa.
             ahora = datetime.datetime.now()
 
             # Un mes antes de la fecha de hoy.
-            inicio = ahora - datetime.timedelta(days=30)    # Valor por defecto
+            inicio = ahora - datetime.timedelta(days=30)
             final = ahora
 
             print('No se indicaron fechas. Se usará rango por defecto: 30 días atrás.\n')
 
+        elif inicio == final:
+            """
+            Se indicaron las mismas fechas, así que se interpretan como 'todo el día de hoy'.
+            """
+
+            inicio = datetime.datetime.strptime(inicio, '%d-%m-%Y')
+            final = inicio + datetime.timedelta(days=1)
+
         else:
+            """
+            Se indicaron las fechas correctamente.
+            """
+
             inicio = datetime.datetime.strptime(inicio, '%d-%m-%Y')
             final = datetime.datetime.strptime(final, '%d-%m-%Y')
 
@@ -115,12 +140,14 @@ def tratar_fechas(inicio, final):
 
                     print("Fechas invertidas.")
 
-                elif respuesta == 'n':
-                    print("Has intentado desafiar las leyes del espacio-tiempo.")
-                    exit()
-
                 else:
-                    print("Opción no válida.")
+                    # Humor.
+                    if respuesta == 'n':
+                        print("Has intentado desafiar las leyes del espacio-tiempo.")
+
+                    else:
+                        print("Opción no válida.")
+
                     exit()
 
     except:
