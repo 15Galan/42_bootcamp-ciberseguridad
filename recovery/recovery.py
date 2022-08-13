@@ -11,6 +11,7 @@ Usará el módulo 'argparse' para recibir los parámetros de entrada.
 
 import win32process
 import win32evtlog
+import win32com.client
 import argparse
 import datetime
 import wmi
@@ -172,6 +173,41 @@ def actividad_usuario(inicio, final):
     return None
 
 
+def archivos_recientes(inicio, final):
+    """
+    Obtiene los archivos recientes en un rango de fechas.
+
+    :param inicio: Fecha de inicio del rango de fechas.
+    :param final: Fecha de fin del rango de fechas.
+
+    :return: Lista de archivos recientes.
+    """
+
+    # Conjunto de archivos recientes
+    archivos = set()
+
+    # Obtener el directorio de archivos reciente por defecto.
+    directorio = os.environ['USERPROFILE'] + '\\AppData\\Roaming\\Microsoft\\Windows\\Recent'
+
+    # Obtener todos enlaces directos del directorio de archivos recientes.
+    for archivo in os.listdir(directorio):
+        # Comprobar que el elemento es un archivo '.lnk' (enlace simbólico de Windows).
+        if archivo.endswith('.lnk'):
+            # Obtener la ruta real de los enlaces.
+            shell = win32com.client.Dispatch("WScript.Shell")
+            ruta = shell.CreateShortCut(directorio + '\\' + archivo).targetpath
+
+            if os.path.isfile(ruta):
+                # Obtener la fecha de creación del enlace (sin la hora).
+                fecha = datetime.datetime.fromtimestamp(os.path.getctime(directorio + '\\' + archivo))
+
+                # Comprobar que el archivo está dentro del rango de fechas.
+                if inicio <= fecha <= final:
+                    archivos.add(ruta)
+
+    return archivos
+
+
 def programas_abiertos(inicio, final):
     """
     Obtiene los programas abiertos en un rango de fechas.
@@ -273,6 +309,15 @@ if __name__ == "__main__":
 
     # for actividad in actividades:
     #     print("\t" + actividad)
+
+    # Obtener los archivos recientes en un rango de fechas.
+    recientes = archivos_recientes(inicio, final)
+
+    # Imprimir los archivos recientes.
+    print("Archivos recientes:")
+
+    for reciente in recientes:
+        print("\t" + reciente)
 
     # Obtener programas instalados en un rango de fechas.
     instalados = programas_instalados(inicio, final)
