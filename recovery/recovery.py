@@ -249,7 +249,7 @@ def archivos_temporales(inicio, final):
 
 def programas_abiertos(inicio, final):
     """
-    Obtiene los programas abiertos en un rango de fechas.
+    Obtiene los programas que fueron accedidos por última vez en un intervalo de fechas.
 
     :param inicio: Fecha de inicio del rango de fechas.
     :param final: Fecha de fin del rango de fechas.
@@ -257,9 +257,25 @@ def programas_abiertos(inicio, final):
     :return: Lista de programas abiertos.
     """
 
-    # TODO: implementar
+    # TODO: revisar, ¿se puede considerar un '.exe' como un programa?
 
-    return None
+    # Conjunto de programas abiertos.
+    programas = set()
+
+    # Listar todos los ficheros ejecutables del sistema, ejecutados por última vez en el intervalo de fechas.
+    for archivo in ficheros('C:\\', 'exe'):
+        try:
+            # Obtener la fecha de última ejecución del archivo.
+            fecha = datetime.datetime.fromtimestamp(os.path.getatime(archivo))
+
+            # Comprobar que el archivo está dentro del rango de fechas.
+            if inicio <= fecha <= final:
+                programas.add(archivo)
+
+        except:
+            pass
+
+    return programas
 
 
 def programas_instalados(inicio, final):
@@ -338,6 +354,15 @@ if __name__ == "__main__":
     for temporal in temporales:
         print("\t" + temporal)
 
+    # Obtener los programas abiertos en un rango de fechas.
+    abiertos = programas_abiertos(inicio, final)
+
+    # Imprimir los programas abiertos.
+    print("Programas abiertos:")
+
+    for programa in abiertos:
+        print("\t" + programa)
+
     # Obtener programas instalados en un rango de fechas.
     instalados = programas_instalados(inicio, final)
 
@@ -346,15 +371,6 @@ if __name__ == "__main__":
 
     for programa in sorted(instalados):
         print("\t" + programa)
-
-    # Obtener los programas abiertos en un rango de fechas.
-    # abiertos = programas_abiertos(inicio, final)
-
-    # Imprimir los programas abiertos.
-    # print("Programas abiertos:")
-
-    # for programa in abiertos:
-    #     print("\t" + programa)
 
     # Obtener el historial de navegación en un rango de fechas.
     # historial = historial_navegacion(inicio, final)
