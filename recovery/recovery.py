@@ -9,8 +9,6 @@ directorios y programas abiertos en dicho rango de tiempo.
 Usará el módulo 'argparse' para recibir los parámetros de entrada.
 """
 
-import win32process
-import win32evtlog
 import win32com.client
 import argparse
 import datetime
