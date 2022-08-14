@@ -206,6 +206,38 @@ def archivos_recientes(inicio, final):
     return archivos
 
 
+def archivos_temporales(inicio, final):
+    """
+    Obtiene los archivos temporales en un rango de fechas.
+
+    :param inicio: Fecha de inicio del rango de fechas.
+    :param final: Fecha de fin del rango de fechas.
+
+    :return: Lista de archivos temporales.
+    """
+
+    # Conjunto de archivos temporales
+    archivos = set()
+
+    # Obtener el directorio de archivos temporales por defecto.
+    directorio = os.environ['USERPROFILE'] + '\\AppData\\Local\\Temp'
+
+    # Obtener todos enlaces directos del directorio de archivos temporales.
+    for archivo in ficheros(directorio, None):
+        try:
+            # Obtener la fecha de creación del archivo.
+            fecha = datetime.datetime.fromtimestamp(os.path.getctime(archivo))
+
+            # Comprobar que el archivo está dentro del rango de fechas.
+            if inicio <= fecha <= final:
+                archivos.add(archivo)
+
+        except:
+            pass
+
+    return archivos
+
+
 def programas_abiertos(inicio, final):
     """
     Obtiene los programas abiertos en un rango de fechas.
@@ -239,7 +271,7 @@ def ficheros(ruta, extension):
 
         # Comprobar que el fichero tiene la extensión indicada.
         for fichero in ficheros:
-            if fichero.endswith("." + extension):
+            if extension is None or fichero.endswith("." + extension):
                 lista.append(os.path.join(ruta, fichero))       # Añadir el fichero a la lista.
 
     return lista
@@ -316,6 +348,15 @@ if __name__ == "__main__":
 
     for reciente in recientes:
         print("\t" + reciente)
+
+    # Obtener los archivos temporales en un rango de fechas.
+    temporales = archivos_temporales(inicio, final)
+
+    # Imprimir los archivos temporales.
+    print("Archivos temporales:")
+
+    for temporal in temporales:
+        print("\t" + temporal)
 
     # Obtener programas instalados en un rango de fechas.
     instalados = programas_instalados(inicio, final)
