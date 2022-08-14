@@ -294,11 +294,15 @@ def programas_instalados(inicio, final):
 
     # Listar todos los ficheros ejecutables del sistema.
     for fichero in ficheros('C:\\', 'exe'):
-        fecha = datetime.datetime.fromtimestamp(os.path.getctime(fichero))      # Obtener la fecha de creación.
+        try:
+            fecha = datetime.datetime.fromtimestamp(os.path.getctime(fichero))      # Obtener la fecha de creación.
 
-        # Comprobar que el fichero se creó en el rango de fechas.
-        if inicio <= fecha <= final:
-            programas.add(fichero)      # Añadir el fichero al conjunto
+            # Comprobar que el fichero se creó en el rango de fechas.
+            if inicio <= fecha <= final:
+                programas.add(fichero)      # Añadir el fichero al conjunto
+
+        except:
+            pass
 
     return programas
 
