@@ -156,19 +156,28 @@ def tratar_fechas(inicio, final):
     return inicio, final
 
 
-def actividad_usuario(inicio, final):
+def ficheros(ruta, extension):
     """
-    Obtiene la actividad del usuario en un rango de fechas.
+    Lista los ficheros de una ruta, incluidos subdirectorios.
 
-    :param inicio: Fecha de inicio del rango de fechas.
-    :param final: Fecha de fin del rango de fechas.
+    :param ruta: Ruta del directorio.
+    :param extension: Extensión de los ficheros a listar.
 
-    :return: Lista de actividad del usuario.
+    :return: Lista de ficheros.
     """
 
-    # TODO: implementar
+    # Lista de ficheros.
+    lista = []
 
-    return None
+    # Listar los ficheros de la ruta.
+    for ruta, _, ficheros in os.walk(ruta):
+
+        # Comprobar que el fichero tiene la extensión indicada.
+        for fichero in ficheros:
+            if extension is None or fichero.endswith("." + extension):
+                lista.append(os.path.join(ruta, fichero))       # Añadir el fichero a la lista.
+
+    return lista
 
 
 def archivos_recientes(inicio, final):
@@ -253,30 +262,6 @@ def programas_abiertos(inicio, final):
     return None
 
 
-def ficheros(ruta, extension):
-    """
-    Lista los ficheros de una ruta, incluidos subdirectorios.
-
-    :param ruta: Ruta del directorio.
-    :param extension: Extensión de los ficheros a listar.
-
-    :return: Lista de ficheros.
-    """
-
-    # Lista de ficheros.
-    lista = []
-
-    # Listar los ficheros de la ruta.
-    for ruta, _, ficheros in os.walk(ruta):
-
-        # Comprobar que el fichero tiene la extensión indicada.
-        for fichero in ficheros:
-            if extension is None or fichero.endswith("." + extension):
-                lista.append(os.path.join(ruta, fichero))       # Añadir el fichero a la lista.
-
-    return lista
-
-
 def programas_instalados(inicio, final):
     """
     Obtiene los programas instalados en un rango de fechas.
@@ -334,15 +319,6 @@ if __name__ == "__main__":
 
     # Establecer conexión con el sistema.
     conexion = wmi.WMI()
-
-    # Obtener la actividad del usuario en un rango de fechas.
-    # actividades = actividad_usuario(inicio, final)
-
-    # Imprimir la actividad del usuario.
-    # print("Actividad del usuario:")
-
-    # for actividad in actividades:
-    #     print("\t" + actividad)
 
     # Obtener los archivos recientes en un rango de fechas.
     recientes = archivos_recientes(inicio, final)
