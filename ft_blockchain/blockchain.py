@@ -1,4 +1,7 @@
+import json
+
 from time import time
+from hashlib import sha256
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -79,11 +82,18 @@ class Blockchain(object):
     @staticmethod
     def computar_hash(bloque):
         """
-        Calcula el hash de un bloque.
+        Calcula el hash de un bloque usando SHA256.
 
         :param bloque: Bloque al que calcularle el hash.
+
+        :return: Hash del bloque en formato hexadecimal.
         """
-        pass
+        
+        # Convertir el bloque (en formato JSON) a un 'str'.
+        bloque_s = json.dumps(bloque, sort_keys=True).encode()
+
+        # Calcular el hash del bloque.
+        return sha256(bloque_s).hexdigest()
 
 
     @property
