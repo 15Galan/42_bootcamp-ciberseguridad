@@ -5,15 +5,23 @@ from time import time
 
 
 class Blockchain(object):
+    """
+    Clase que representa una Blockchain.
+    Gestiona una lista de transacciones y de bloques, simulando
+    el funcionamiento real de una blockchain, pero a menor escala.
+    """
 
     def __init__(self):
         """
         Inicializa la blockchain con un bloque genesis.
         """
 
+        # Inicializar una blockchain vacía.
         self.cadena = []
         self.transacciones = []
 
+        # Crear el bloque genesis.
+        self.crear_bloque(anterior=0, prueba=100)   # Valores por defecto (genesis)
 
 
     def crear_bloque(self, anterior=None, prueba=None):
