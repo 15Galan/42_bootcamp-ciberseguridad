@@ -1,3 +1,9 @@
+from time import time
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+
+
 class Blockchain(object):
 
     def __init__(self):
@@ -9,11 +15,32 @@ class Blockchain(object):
         self.transacciones = []
 
 
-    def crear_bloque(self):
+
+    def crear_bloque(self, anterior=None, prueba=None):
         """
         Crea un nuevo bloque y lo agrega a la cadena de bloques.
+
+        :param anterior: índice del bloque anterior.
+        :param prueba: valor de la prueba (PoW) para el nuevo bloque.
         """
-        pass
+
+        # Crear un nuevo bloque.
+        bloque = {
+            'índice': len(self.cadena) + 1,
+            'timestamp': time(),
+            'transacciones': self.transacciones,
+            'prueba': prueba,
+            'anterior': anterior
+        }
+
+        # Agregar el bloque a la cadena.
+        self.cadena.append(bloque)
+
+        # Limpiar la cadena de transacciones.
+        self.transacciones = []
+
+        # Devolver el bloque recién creado.
+        return bloque
 
 
     def crear_transaccion(self, emisor, receptor, cantidad):
