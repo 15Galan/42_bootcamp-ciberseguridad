@@ -16,11 +16,29 @@ class Blockchain(object):
         pass
 
 
-    def crear_transaccion(self):
+    def crear_transaccion(self, emisor, receptor, cantidad):
         """
         Crea una nueva transacción y la agrega a la cadena de transacciones.
+
+        :param emisor: dirección del emisor.
+        :param receptor: dirección del receptor.
+        :param cantidad: cantidad enviada del emisor al receptor.
+
+        :return: índice del bloque que contendrá esta transacción.
         """
-        pass
+        
+        # Crear una nueva transacción.
+        transaccion = {
+            'emisor': emisor,
+            'receptor': receptor,
+            'cantidad': cantidad
+        }
+
+        # Agregar la transacción a la cadena.
+        self.transacciones.append(transaccion)
+
+        # Devolver el índice del siguiente bloque a ser minado.
+        return self.ultimo_bloque['index'] + 1
 
 
     @staticmethod
