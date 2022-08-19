@@ -44,10 +44,9 @@ def cadena_completa():
     """
 
     response = {
-        'cadena': b.chain,
-        'nodos': len(b.chain),
+        'cadena': b.cadena,
+        'nodos': len(b.cadena),
     }
-
 
     return jsonify(response), 200
 
