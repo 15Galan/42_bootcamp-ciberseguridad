@@ -1,5 +1,5 @@
 from blockchain import Blockchain
-from flask      import Flask, jsonify
+from flask      import Flask, jsonify, request
 from uuid       import uuid4
 
 
@@ -32,7 +32,29 @@ def nueva_transaccion():
     Crea una nueva transacción y la agrega a la blockchain.
     """
 
-    return None
+    # Obtener los datos de la transacción.
+    valores = request.get_json()
+
+    # Verificar que los valores de la transacción sean válidos.
+    if 'emisor' not in valores:
+        return jsonify({'error': 'La transacción no tiene emisor.'}), 400
+
+    elif 'receptor' not in valores:
+        return jsonify({'error': 'La transacción no tiene receptor.'}), 400
+
+    elif 'cantidad' not in valores:
+        return jsonify({'error': 'La transacción no tiene cantidad.'}), 400
+
+    # Crear una nueva transacción.
+    indice = b.crear_transaccion(valores['emisor'], valores['receptor'], valores['cantidad'])
+
+    # Crear una respuesta JSON con el índice del bloque que contendrá la transacción.
+    if indice:
+        return jsonify({'mensaje': f'Transacción añadida al Bloque {indice}.'}), 201
+
+    else:
+        return jsonify({'error': 'Fallo al registrar la transacción.'}), 500
+
 
 # Definir la ruta de consulta de la blockchain de una petición GET de la API.
 @aplicacion.route('/chain', methods=['GET'])
