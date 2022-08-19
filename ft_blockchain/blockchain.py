@@ -53,7 +53,6 @@ class Blockchain(object):
         # Devolver el bloque recién creado.
         return bloque
 
-
     def crear_transaccion(self, emisor, receptor, cantidad):
         """
         Crea una nueva transacción y la agrega a la cadena de transacciones.
@@ -64,7 +63,7 @@ class Blockchain(object):
 
         :return: índice del bloque que contendrá esta transacción.
         """
-        
+
         # Crear una nueva transacción.
         transaccion = {
             'emisor': emisor,
@@ -76,8 +75,7 @@ class Blockchain(object):
         self.transacciones.append(transaccion)
 
         # Devolver el índice del siguiente bloque a ser minado.
-        return self.ultimo_bloque['index'] + 1
-
+        return self.ultimo_bloque['índice'] + 1
 
     @staticmethod
     def computar_hash(bloque):
@@ -88,22 +86,20 @@ class Blockchain(object):
 
         :return: Hash del bloque en formato hexadecimal.
         """
-        
+
         # Convertir el bloque (en formato JSON) a un 'str'.
         bloque_s = json.dumps(bloque, sort_keys=True).encode()
 
         # Calcular el hash del bloque.
         return sha256(bloque_s).hexdigest()
 
-
     @property
     def ultimo_bloque(self):
         """
         :return: El último bloque de la cadena de bloques.
         """
-        
+
         return self.cadena[-1]
-    
 
     def prueba_trabajo(self, anterior):
         """
