@@ -24,14 +24,14 @@ class Blockchain(object):
         self.transacciones = []
 
         # Crear el bloque genesis.
-        self.crear_bloque(anterior=0, prueba=100)   # Valores por defecto (genesis)
+        self.crear_bloque(anterior=None, prueba=1)   # Valores por defecto (genesis)
 
 
     def crear_bloque(self, anterior=None, prueba=None):
         """
         Crea un nuevo bloque y lo agrega a la cadena de bloques.
 
-        :param anterior: índice del bloque anterior.
+        :param anterior: hash del bloque anterior.
         :param prueba: valor de la prueba (PoW) para el nuevo bloque.
         """
 

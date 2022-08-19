@@ -23,7 +23,34 @@ def minar():
     Mina un nuevo bloque y lo agrega a la blockchain.
     """
 
-    return None
+    # Realizar prueba de trabajo (PoW).
+    ultimo_bloque = b.ultimo_bloque
+    ultima_prueba = ultimo_bloque['prueba']
+
+    prueba = b.prueba_trabajo(ultima_prueba)
+
+    # Generar transacción para recompensar al minero.
+    b.crear_transaccion(0, id, 1)
+
+    """
+    Se usa el emisor '0' (genesis) para representar una transacción de recompensa.
+    La recompensa de este ejemplo es 1 unidad.
+    """
+
+    # Crear el nuevo bloque.
+    bloque = b.crear_bloque(b.computar_hash(ultimo_bloque), prueba)
+
+    # Respuesta de la petición HTTP.
+    respuesta = {
+        'mensaje': 'Se ha creado un nuevo bloque.',
+        'índice': bloque['índice'],
+        'transacciones': bloque['transacciones'],
+        'prueba': bloque['prueba'],
+        'hash anterior': bloque['anterior']
+    }
+
+    return jsonify(respuesta), 201
+
 
 # Definir la ruta de creación de transacciones de una petición POST de la API.
 @aplicacion.route('/transactions/new', methods=['POST'])
