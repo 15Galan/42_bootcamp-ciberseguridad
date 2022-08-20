@@ -15,6 +15,8 @@ import datetime
 import wmi
 import os
 
+from browser_history import get_history
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -318,9 +320,24 @@ def historial_navegacion(inicio, final):
     :return: Lista de historial de navegación.
     """
 
-    # TODO: implementar
+    # Conjunto de entradas de todos los historiales.
+    entradas = set()
 
-    return None
+    # Entradas de los historiales de todos los navegadores instalados.
+    historiales = get_history().histories
+
+    for entrada in historiales:
+        # Obtener datos de la tuplpa.
+        fecha, url = entrada
+
+        # Tratar fecha (ya que se obtiene con zona horaria)
+        fecha = fecha.replace(tzinfo=None)
+
+        # Comprobar que la entrada está dentro del rango de fechas.
+        if inicio <= fecha <= final:
+            entradas.add(url)
+
+    return entradas
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -373,13 +390,13 @@ if __name__ == "__main__":
         print("\t" + programa)
 
     # Obtener el historial de navegación en un rango de fechas.
-    # historial = historial_navegacion(inicio, final)
+    historial = historial_navegacion(inicio, final)
 
     # Imprimir el historial de navegación.
-    # print("Historial de navegación:")
+    print("Historial de navegación:")
 
-    # for entrada in historial:
-    #     print("\t" + entrada)
+    for entrada in historial:
+        print("\t" + entrada)
 
     # Obtener el directorio actual.
     # directorio_actual = os.getcwd()
