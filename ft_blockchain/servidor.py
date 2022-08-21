@@ -30,11 +30,11 @@ def minar():
     prueba = b.prueba_trabajo(ultima_prueba)
 
     # Generar transacción para recompensar al minero.
-    b.crear_transaccion(0, id, 1)
+    b.crear_transaccion(0, id, 1 + len(b.cadena) // 10)
 
     """
     Se usa el emisor '0' (genesis) para representar una transacción de recompensa.
-    La recompensa de este ejemplo es 1 unidad.
+    La recompensa de esta prueba de concepto es 1 unidad por cada 10 bloques existentes.
     """
 
     # Crear el nuevo bloque.

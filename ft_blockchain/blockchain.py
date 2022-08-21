@@ -104,15 +104,20 @@ class Blockchain(object):
     def prueba_trabajo(self, anterior):
         """
         Calcula la prueba de trabajo para un nuevo bloque usando
-        un número 'y' tal que 'hash(x·y)' termina en '4242'; donde
+        un número 'y' tal que 'hash(x·y)' termina en '42'; donde
         'x' es la prueba anterior e 'y' es la prueba actual.
+        Cada 10 bloques minados, se añade un '42' necesario al
+        final del hash (es decir, '42', '4242', '424242'...).
         """
         
-        prueba = 0      # Contador
+        prueba = anterior      # Contador
+        final = '42' * (1 + len(self.cadena) // 10)     # Final de la prueba
 
         # Calcular la prueba de trabajo.
-        while sha256(f'{anterior * prueba}'.encode()).hexdigest().endswith('4242'):
+        print(prueba, sha256(f'{anterior * prueba}'.encode()).hexdigest(), final)
+        while not sha256(f'{anterior * prueba}'.encode()).hexdigest().endswith(final):
             prueba += 1
+            print(prueba, sha256(f'{anterior * prueba}'.encode()).hexdigest(), final)
 
         # Devolver la prueba de trabajo.
         return prueba
