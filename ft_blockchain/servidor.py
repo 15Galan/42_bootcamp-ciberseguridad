@@ -42,7 +42,7 @@ def minar():
 
     # Respuesta de la petición HTTP.
     respuesta = {
-        'mensaje': 'Se ha creado un nuevo bloque.',
+        'timestamp': bloque['timestamp'],
         'índice': bloque['índice'],
         'transacciones': bloque['transacciones'],
         'prueba': bloque['prueba'],
