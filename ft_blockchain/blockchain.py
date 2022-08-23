@@ -2,6 +2,7 @@ import json
 
 from time import time
 from hashlib import sha256
+from urllib.parse import urlparse
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -78,6 +79,16 @@ class Blockchain(object):
 
         # Devolver el índice del siguiente bloque a ser minado.
         return self.ultimo_bloque['índice'] + 1
+
+        
+    def crear_nodo(self, direccion):
+        """
+        Crea un nuevo nodo y lo añade al conjunto de nodos.
+
+        :param direccion: Dirección del nodo.
+        """
+
+        self.nodos.add(urlparse(direccion).netloc)
 
 
     @staticmethod

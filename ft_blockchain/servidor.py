@@ -83,6 +83,32 @@ def nueva_transaccion():
         return jsonify({'error': 'Fallo al registrar la transacción.'}), 500
 
 
+# Definir la ruta de consulta de la blockchain de una petición POST de la API.
+@aplicacion.route('/nodes/register', methods=['POST'])
+def registrar_nodo():
+    """
+    Registra un nuevo nodo en la cadena de bloques.
+    """
+
+    # Obtener los datos de la petición.
+    valores = request.get_json()
+
+    # Verificar que los datos de la petición sean válidos.
+    if 'nodo' not in valores:
+        return jsonify({'error': 'La petición no tiene nodo.'}), 400
+
+    # Agregar el nodo a la cadena de bloques.
+    b.agregar_nodo(valores['nodo'])
+
+    # Respuesta de la petición HTTP.
+    respuesta = {
+        'mensaje': 'Nodo agregado',
+        'cadena de nodos': b.cadena
+    }
+
+    return jsonify(respuesta), 201
+
+
 # Definir la ruta de consulta de la blockchain de una petición GET de la API.
 @aplicacion.route('/chain', methods=['GET'])
 def cadena_completa():
