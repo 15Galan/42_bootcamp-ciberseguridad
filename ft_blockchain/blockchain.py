@@ -21,6 +21,7 @@ class Blockchain(object):
 
         # Inicializar una blockchain vacía.
         self.cadena = []
+        self.nodos = set()
         self.transacciones = []
 
         # Crear el bloque genesis.
@@ -53,6 +54,7 @@ class Blockchain(object):
         # Devolver el bloque recién creado.
         return bloque
 
+
     def crear_transaccion(self, emisor, receptor, cantidad):
         """
         Crea una nueva transacción y la agrega a la cadena de transacciones.
@@ -77,6 +79,7 @@ class Blockchain(object):
         # Devolver el índice del siguiente bloque a ser minado.
         return self.ultimo_bloque['índice'] + 1
 
+
     @staticmethod
     def computar_hash(bloque):
         """
@@ -93,6 +96,7 @@ class Blockchain(object):
         # Calcular el hash del bloque.
         return sha256(bloque_s).hexdigest()
 
+
     @property
     def ultimo_bloque(self):
         """
@@ -100,6 +104,7 @@ class Blockchain(object):
         """
 
         return self.cadena[-1]
+
 
     def prueba_trabajo(self, anterior):
         """
