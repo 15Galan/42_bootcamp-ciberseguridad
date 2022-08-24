@@ -1,4 +1,5 @@
 import json
+import requests
 
 from time import time
 from hashlib import sha256
@@ -188,4 +189,44 @@ class Blockchain(object):
             indice += 1
             
         return True
+
+
+    def resolver_conflictos(self):
+        """
+        Resuelve los conflictos de la cadena de bloques,
+        reemplazándola por aquella cadena válida más larga.
+        Implementación del 'algoritmo de consenso'.
+
+        :return:    True si la cadena de bloques se reemplaza; False en caso contrario.
+        """
+
+        # Inicializar variables.
+        nodos = self.nodos
+        cadena_max = []         # Centinela.
         
+        # Comprobar las cadenas de los nodos vecinos.
+        for n in nodos:
+            try:
+                # Crear una petición de la cadena al nodo.
+                peticion = requests.get(f'http://{n}/chain').json()     # Parseado a JSON.
+
+                if peticion.status_code == 200:
+
+                    # Obtener la cadena del nodo.
+                    cadena_nodo = peticion['cadena']
+
+                    # Comprobar si la cadena recibida es válida y más larga.
+                    if self.validar_cadena(cadena_nodo) and len(cadena_max) < len(cadena_nodo):
+                        # Reemplazar la cadena de bloques.
+                        cadena_max = cadena_nodo
+                        
+            except requests.exceptions.ConnectionError:
+                print(f'Error de conexión con el nodo {n}. Ignorando en el consenso.')
+
+        # Reemplazar la cadena de bloques.
+        if len(self.cadena) < len(cadena_max):
+            self.cadena = cadena_max
+
+            return True
+
+        return False
