@@ -137,3 +137,21 @@ class Blockchain(object):
 
         # Devolver la prueba de trabajo.
         return prueba
+
+
+    def validar_prueba(anterior, actual):
+        """
+        Determina si una prueba es válida.
+        
+        :param anterior:    Prueba anterior.
+        :param actual:      Prueba actual.
+
+        :return:            True si la prueba es válida; False en caso contrario.
+        """
+
+        # Calcular la prueba de trabajo.
+        final = '42' * (1 + len(self.cadena) // 10)     # Final de la prueba
+
+        # Determinar si la prueba es válida.
+        return sha256(f'{anterior * actual}'.encode()).hexdigest().endswith(final)
+        
