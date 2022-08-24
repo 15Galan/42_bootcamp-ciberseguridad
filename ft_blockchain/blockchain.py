@@ -139,7 +139,7 @@ class Blockchain(object):
         return prueba
 
 
-    def validar_prueba(anterior, actual):
+    def validar_prueba(self, anterior, actual):
         """
         Determina si una prueba es válida.
         
@@ -154,4 +154,38 @@ class Blockchain(object):
 
         # Determinar si la prueba es válida.
         return sha256(f'{anterior * actual}'.encode()).hexdigest().endswith(final)
+
+
+    def validar_cadena(self, cadena):
+        """
+        Determina si una cadena es válida.
+
+        :param cadena:  Cadena a validar.
+
+        :return:        True si es válida; False en caso contrario.
+        """
+
+        # Inicializar las variables.
+        ultimo_bloque = cadena[-1]
+        indice = 1
+
+        # Comprobar qué cadena
+        while indice < len(cadena):
+            bloque = cadena[indice]
+
+            # Verificar que el bloque anterior es el correcto.
+            if bloque['anterior'] != ultimo_bloque['hash']:
+                return False
+
+            # Verificar que el hash del bloque es correcto.
+            if self.computar_hash(bloque) != bloque['hash']:
+                return False
+
+            # Actualizar el último bloque.
+            ultimo_bloque = bloque
+
+            # Incrementar el índice.
+            indice += 1
+            
+        return True
         
