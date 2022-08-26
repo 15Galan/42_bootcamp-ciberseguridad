@@ -109,6 +109,31 @@ def registrar_nodo():
     return jsonify(respuesta), 201
 
 
+@aplicacion.route('/nodes/resolve', methods=['GET'])
+def resolver_nodos():
+    """
+    Resuelve los nodos en la cadena de bloques.
+    """
+
+    # Resolver la cadena de bloques.
+    reemplazo = b.resolver_conflictos()
+
+    # Respuesta de la petición HTTP.
+    if reemplazo:
+        respuesta = {
+            'mensaje': 'La cadena de bloques se ha reemplazado.',
+            'nueva cadena de bloques': b.cadena
+        }
+
+    else:
+        respuesta = {
+            'mensaje': 'La cadena de bloques está actualizada.',
+            'cadena de bloques': b.cadena
+        }
+
+    return jsonify(respuesta), 200
+
+
 # Definir la ruta de consulta de la blockchain de una petición GET de la API.
 @aplicacion.route('/chain', methods=['GET'])
 def cadena_completa():
