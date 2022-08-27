@@ -28,20 +28,6 @@ def leer_argumentos():
     :return: Valor y opciones de los argumentos leídos.
     """
 
-    # Leer los argumentos de entrada.
-    analizador = inicializar_analizador()
-
-    # Devolver los argumentos de entrada.
-    return analizador.i, analizador.f
-
-
-def inicializar_analizador():
-    """
-    Inicializa el analizador de argumentos.
-
-    :return: Objeto del analizador de argumentos.
-    """
-
     # Crear un analizador de argumentos.
     analizador = argparse.ArgumentParser(
         description='Programa para obtener información de un sistema Windows.',
@@ -64,8 +50,11 @@ def inicializar_analizador():
         help="Fecha final del rango de fechas en formato 'DD-MM-AAAA' (por defecto, hoy)."
     )
 
-    # Devolver el analizador de argumentos.
-    return analizador.parse_args()
+    # Extraer los argumentos.
+    analizador = analizador.parse_args()
+
+    # Devolver los argumentos de entrada.
+    return analizador.i, analizador.f
 
 
 def tratar_fechas(inicio, final):
