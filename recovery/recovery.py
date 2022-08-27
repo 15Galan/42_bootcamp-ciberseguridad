@@ -12,6 +12,7 @@ Usará el módulo 'argparse' para recibir los parámetros de entrada.
 import win32com.client
 import argparse
 import datetime
+import winreg
 import wmi
 import os
 
@@ -171,6 +172,36 @@ def ficheros(ruta, extension):
     return lista
 
 
+def cambios_ramas_registro():
+    """
+    Obtiene los cambios de ramas registrados en el registro del sistema en un intervalo de fechas.
+
+    :return: lista de fechas en las que se cambiaron el registro.
+    """
+
+    # Conjunto de fechas en las que se cambiaron ramas del registro.
+    fechas = set()
+
+    # Tipos de registros a analizar
+    tipos_clave = [winreg.HKEY_LOCAL_MACHINE, winreg.HKEY_CURRENT_USER]
+
+    # Obtener los cambios de ramas registrados.
+    for clave in tipos_clave:
+        # Obtener el manjeador de registros.
+        manejador = winreg.OpenKey(clave, "Software\\Microsoft\\Windows\\CurrentVersion\\Run")
+
+        # Obtener el timestamp de la última actualización.
+        timestamp = winreg.QueryInfoKey(manejador)[2] / 10000000 - 11644473600
+
+        # Obtener la fecha del cambio (en formato 'DD-MM-AAAA').
+        fecha = datetime.datetime.fromtimestamp(timestamp).strftime('%d-%m-%Y')
+
+        # Añadir la fecha al conjunto.
+        fechas.add(fecha)
+
+    return fechas
+
+
 def archivos_recientes(inicio, final):
     """
     Obtiene los archivos recientes en un rango de fechas.
@@ -328,6 +359,15 @@ if __name__ == "__main__":
 
     # Establecer conexión con el sistema.
     conexion = wmi.WMI()
+
+    # Obtener los cambios en las ramas de registro.
+    cambios = cambios_ramas_registro()
+
+    # Imprimir los cambios en las ramas de registro.
+    print("Cambios en las ramas de registro:")
+
+    for cambio in cambios:
+        print("\t" + cambio)
 
     # Obtener los archivos recientes en un rango de fechas.
     recientes = archivos_recientes(inicio, final)
