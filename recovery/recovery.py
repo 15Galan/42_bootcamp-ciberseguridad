@@ -238,35 +238,22 @@ def archivos_temporales(inicio, final):
     return archivos
 
 
-def programas_abiertos(inicio, final):
+def programas_abiertos():
     """
-    Obtiene los programas que fueron accedidos por última vez en un intervalo de fechas.
+    Obtiene los procesos abiertos en este momento.
+    Los "programas" abiertos según el subject en español.
 
-    :param inicio: Fecha de inicio del rango de fechas.
-    :param final: Fecha de fin del rango de fechas.
-
-    :return: Lista de programas abiertos.
+    :return: Lista de procesos abiertos.
     """
 
-    # TODO: revisar, ¿se puede considerar un '.exe' como un programa?
+    # Lista de procesos abiertos.
+    procesos = []
 
-    # Conjunto de programas abiertos.
-    programas = set()
+    # Obtener todos los procesos abiertos.
+    for proceso in conexion.Win32_Process():
+        procesos.append(proceso.Name)
 
-    # Listar todos los ficheros ejecutables del sistema, ejecutados por última vez en el intervalo de fechas.
-    for archivo in ficheros('C:\\', 'exe'):
-        try:
-            # Obtener la fecha de última ejecución del archivo.
-            fecha = datetime.datetime.fromtimestamp(os.path.getatime(archivo))
-
-            # Comprobar que el archivo está dentro del rango de fechas.
-            if inicio <= fecha <= final:
-                programas.add(archivo)
-
-        except:
-            pass
-
-    return programas
+    return procesos
 
 
 def programas_instalados(inicio, final):
@@ -361,7 +348,7 @@ if __name__ == "__main__":
         print("\t" + temporal)
 
     # Obtener los programas abiertos en un rango de fechas.
-    abiertos = programas_abiertos(inicio, final)
+    abiertos = programas_abiertos()
 
     # Imprimir los programas abiertos.
     print("Programas abiertos:")
