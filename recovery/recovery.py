@@ -420,12 +420,3 @@ if __name__ == "__main__":
 
     for entrada in historial:
         print("\t" + entrada)
-
-    # Obtener el directorio actual.
-    # directorio_actual = os.getcwd()
-
-    # Obtener el nombre del fichero.
-    # fichero = os.path.basename(__file__)
-
-    # Obtener la ruta del fichero.
-    # ruta = os.path.join(directorio_actual, fichero)
