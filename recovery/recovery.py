@@ -81,7 +81,7 @@ def tratar_fechas(inicio, final):
 
         elif not inicio and final:
             """
-            No se indicó la fecha inicial, así que se interpreta como la fecha 0 (01-01-2970).
+            No se indicó la fecha inicial, así que se interpreta como la fecha 0 (01-01-1970).
             """
 
             inicio = datetime.datetime.fromtimestamp(0)
@@ -142,7 +142,7 @@ def tratar_fechas(inicio, final):
                     exit()
 
     except:
-        print("Formato de fecha no válido.")
+        print("Formato de fecha no válido: asegúrate de usar el formato 'DD-MM-AAAA'.")
         exit()
 
     return inicio, final
@@ -170,6 +170,9 @@ def ficheros(ruta, extension):
                 lista.append(os.path.join(ruta, fichero))       # Añadir el fichero a la lista.
 
     return lista
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
 def cambios_ramas_registro():
@@ -391,7 +394,7 @@ if __name__ == "__main__":
     abiertos = programas_abiertos()
 
     # Imprimir los programas abiertos.
-    print("Programas abiertos:")
+    print("Programas (procesos) abiertos:")
 
     for programa in abiertos:
         print("\t" + programa)
