@@ -13,6 +13,7 @@ import win32com.client
 import argparse
 import datetime
 import logging
+import winapps
 import winreg
 import wmi
 import os
@@ -301,24 +302,39 @@ def programas_instalados(inicio, final):
     :return: Lista de programas instalados.
     """
 
-    # TODO: revisar, ¿se puede considerar un '.exe' como un programa?
+    # Conjunto grande de programas instalados.
+    programas = set(programa.Name for programa in conexion.Win32_InstalledWin32Program())
 
     # Conjunto de programas instalados.
-    programas = set()
+    aplicaciones = set()
 
-    # Listar todos los ficheros ejecutables del sistema.
-    for fichero in ficheros('C:\\', 'exe'):
+    # Obtener programas instalados.
+    for aplicacion in winapps.list_installed():
         try:
-            fecha = datetime.datetime.fromtimestamp(os.path.getctime(fichero))      # Obtener la fecha de creación.
+            # Obtener los datos de la aplicación.
+            nombre = aplicacion.name
+            fecha = aplicacion.install_date
+            ruta = aplicacion.uninstall_string      # Ruta del desinstalador.
 
-            # Comprobar que el fichero se creó en el rango de fechas.
-            if inicio <= fecha <= final:
-                programas.add(fichero)      # Añadir el fichero al conjunto
+            # Si no se encuentra la fecha de instalación pero sí la ruta de su desinstalador.
+            if not fecha and ruta:
+                # Ajustar el texto para que no tenga comillas adicionales.
+                if ruta[0] == ruta[-1] == "\"":
+                    ruta = ruta[1:-1]
+
+                # Obtener fecha de creación del fichero (desinstalador).
+                fecha = datetime.date.fromtimestamp(os.path.getctime(ruta))
+
+            # Si finalmente se encontró una fecha de instalación, mostrarla.
+            if fecha is not None and inicio.date() <= fecha <= final.date():
+                aplicaciones.add((fecha, nombre))
+                programas.remove(nombre)
 
         except:
             pass
 
-    return programas
+    # Devuelve los programas encontrados y los que no se sabe la fecha.
+    return aplicaciones, programas
 
 
 def historial_navegacion(inicio, final):
@@ -404,13 +420,18 @@ if __name__ == "__main__":
         print("\t" + programa)
 
     # Obtener programas instalados en un rango de fechas.
-    instalados = programas_instalados(inicio, final)
+    instalados, misteriosos = programas_instalados(inicio, final)
 
     # Imprimir los programas instalados.
     print("Programas instalados:")
 
-    for programa in sorted(instalados):
-        print("\t" + programa)
+    for (fecha, nombre) in sorted(instalados):
+        print("\t{}\t{}".format(fecha.strftime('%d-%m-%Y'), nombre))
+
+    print("Programas instalados que no se sabe la fecha:")
+
+    for nombre in misteriosos:
+        print("\t" + nombre)
 
     # Obtener el historial de navegación en un rango de fechas.
     historial = historial_navegacion(inicio, final)
