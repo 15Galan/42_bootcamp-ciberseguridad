@@ -12,6 +12,7 @@ Usará el módulo 'argparse' para recibir los parámetros de entrada.
 import win32com.client
 import argparse
 import datetime
+import logging
 import winreg
 import wmi
 import os
@@ -329,6 +330,9 @@ def historial_navegacion(inicio, final):
 
     :return: Lista de historial de navegación.
     """
+
+    # Desactivar mensajes de logging para evitar 'INFO: <browser> ...'.
+    logging.disable(logging.CRITICAL)
 
     # Conjunto de entradas de todos los historiales.
     entradas = set()
