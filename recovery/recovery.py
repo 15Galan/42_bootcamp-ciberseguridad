@@ -178,7 +178,7 @@ def ficheros(ruta, extension):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-def cambios_ramas_registro():
+def cambios_ramas_registro(inicio, final):
     """
     Obtiene los cambios de ramas registrados en el registro del sistema en un intervalo de fechas.
 
@@ -186,26 +186,32 @@ def cambios_ramas_registro():
     """
 
     # Conjunto de fechas en las que se cambiaron ramas del registro.
-    fechas = set()
+    cambios = set()
 
     # Tipos de registros a analizar
     tipos_clave = [winreg.HKEY_LOCAL_MACHINE, winreg.HKEY_CURRENT_USER]
 
     # Obtener los cambios de ramas registrados.
     for clave in tipos_clave:
-        # Obtener el manjeador de registros.
-        manejador = winreg.OpenKey(clave, "Software\\Microsoft\\Windows\\CurrentVersion\\Run")
+        try:
+            # Obtener el manjeador de registros.
+            manejador = winreg.OpenKey(clave, "Software\\Microsoft\\Windows\\CurrentVersion\\Run")
 
-        # Obtener el timestamp de la última actualización.
-        timestamp = winreg.QueryInfoKey(manejador)[2] / 10000000 - 11644473600
+            # Obtener el timestamp de la última actualización.
+            timestamp = winreg.QueryInfoKey(manejador)[2] / 10000000 - 11644473600
 
-        # Obtener la fecha del cambio (en formato 'DD-MM-AAAA').
-        fecha = datetime.datetime.fromtimestamp(timestamp).strftime('%d-%m-%Y')
+            # Obtener la fecha del cambio (en formato 'DD-MM-AAAA').
+            fecha = datetime.datetime.fromtimestamp(timestamp)
 
-        # Añadir la fecha al conjunto.
-        fechas.add(fecha)
+            # Comprobar que la fecha está dentro del intervalo de fechas.
+            if inicio <= fecha <= final:
+                # Añadir la fecha al conjunto.
+                cambios.add((fecha, clave))
 
-    return fechas
+        except:
+            pass
+
+    return cambios
 
 
 def archivos_recientes(inicio, final):
@@ -238,7 +244,7 @@ def archivos_recientes(inicio, final):
 
                 # Comprobar que el archivo está dentro del rango de fechas.
                 if inicio <= fecha <= final:
-                    archivos.add(ruta)
+                    archivos.add((fecha, ruta))
 
     return archivos
 
@@ -267,7 +273,7 @@ def archivos_temporales(inicio, final):
 
             # Comprobar que el archivo está dentro del rango de fechas.
             if inicio <= fecha <= final:
-                archivos.add(archivo)
+                archivos.add((fecha, archivo))
 
         except:
             pass
@@ -366,7 +372,7 @@ def historial_navegacion(inicio, final):
 
         # Comprobar que la entrada está dentro del rango de fechas.
         if inicio <= fecha <= final:
-            entradas.add(url)
+            entradas.add((fecha, url))
 
     return entradas
 
@@ -426,7 +432,7 @@ def eventos_sistema():
     """
     Obtiene los registros de eventos del sistema.
 
-    :return: Lista de registros de eventos.
+    :return: Lista de eventos del sistema.
     """
 
     # Inicializar variables auxiliares.
@@ -462,37 +468,37 @@ if __name__ == "__main__":
     conexion = wmi.WMI()
 
     # Obtener los cambios en las ramas de registro.
-    cambios = cambios_ramas_registro()
+    cambios = cambios_ramas_registro(inicio, final)
 
     # Imprimir los cambios en las ramas de registro.
-    print("\nCambios en las ramas de registro:")
+    print("\033[1mCambios en las ramas de registro:\033[0m")
 
-    for cambio in cambios:
-        print("\t" + cambio)
+    for fecha, cambio in sorted(cambios):
+        print("\t{}\t{}".format(fecha.strftime("%d-%m-%Y"), cambio))
 
     # Obtener los archivos recientes en un rango de fechas.
     recientes = archivos_recientes(inicio, final)
 
     # Imprimir los archivos recientes.
-    print("\nArchivos recientes:")
+    print("\n\033[1mArchivos recientes:\033[0m")
 
-    for reciente in recientes:
-        print("\t" + reciente)
+    for fecha, archivo in sorted(recientes):
+        print("\t{}\t{}".format(fecha.strftime("%d-%m-%Y"), archivo))
 
     # Obtener los archivos temporales en un rango de fechas.
     temporales = archivos_temporales(inicio, final)
 
     # Imprimir los archivos temporales.
-    print("\nArchivos temporales:")
+    print("\n\033[1mArchivos temporales:\033[0m")
 
-    for temporal in temporales:
-        print("\t" + temporal)
+    for fecha, temporal in sorted(temporales):
+        print("\t{}\t{}".format(fecha.strftime("%d-%m-%Y"), temporal))
 
     # Obtener los programas abiertos en un rango de fechas.
     abiertos = programas_abiertos()
 
     # Imprimir los programas abiertos.
-    print("\nProgramas (procesos) abiertos:")
+    print("\n\033[1mProgramas (procesos) abiertos:\033[0m")
 
     for programa in abiertos:
         print("\t" + programa)
@@ -501,12 +507,12 @@ if __name__ == "__main__":
     instalados, misteriosos = programas_instalados(inicio, final)
 
     # Imprimir los programas instalados.
-    print("\nProgramas instalados:")
+    print("\n\033[1mProgramas instalados:\033[0m")
 
     for (fecha, nombre) in sorted(instalados):
         print("\t{}\t{}".format(fecha.strftime('%d-%m-%Y'), nombre))
 
-    print("\n\tProgramas instalados que no se sabe la fecha:")
+    print("\n\t\033[1mProgramas instalados que no se sabe la fecha:\033[0m")
 
     for nombre in misteriosos:
         print("\t\t" + nombre)
@@ -515,30 +521,25 @@ if __name__ == "__main__":
     historial = historial_navegacion(inicio, final)
 
     # Imprimir el historial de navegación.
-    print("\nHistorial de navegación:")
+    print("\n\033[1mHistorial de navegación:\033[0m")
 
-    for entrada in historial:
-        print("\t" + entrada)
+    for entrada in sorted(historial):
+        print("\t{}\t{}".format(entrada[0].strftime("%d-%m-%Y"), entrada[1]))
 
     # Obtener los dispositivos conectados en este momento.
     dispositivos = dispositivos_conectados()
 
     # Imprimir los dispositivos conectados.
-    print("\nDispositivos conectados:")
+    print("\n\033[1mDispositivos conectados:\033[0m")
 
-    if dispositivos:
-        for dispositivo in dispositivos:
-            print("\t" + dispositivo)
-
-    else:
-        # Mostrar en amarillo que no hay dispositivos conectados.
-        print("\t\033[0;33mNo hay dispositivos conectados\033[0m")
+    for dispositivo in dispositivos:
+        print("\t" + dispositivo)
 
     # Obtener el registro de eventos del sistema.
     registros = eventos_sistema()
 
     # Imprimir los registros de eventos.
-    print("\nRegistros de eventos:")
+    print("\n\033[1mRegistros de eventos:\033[0m")
 
     for (fecha, nombre) in sorted(registros):
         print("\t{}\t{}".format(fecha.strftime('%d-%m-%Y'), nombre))
