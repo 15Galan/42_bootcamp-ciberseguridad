@@ -10,6 +10,7 @@ Usará el módulo 'argparse' para recibir los parámetros de entrada.
 """
 
 import win32com.client
+import win32evtlog
 import argparse
 import datetime
 import logging
@@ -370,6 +371,32 @@ def historial_navegacion(inicio, final):
     return entradas
 
 
+def dispositivos_conectados():
+def eventos_sistema():
+    """
+    Obtiene los registros de eventos del sistema.
+
+    :return: Lista de registros de eventos.
+    """
+
+    # Inicializar variables auxiliares.
+    manejador = win32evtlog.OpenEventLog(None, 'EventLogRegister')
+    flags = win32evtlog.EVENTLOG_BACKWARDS_READ | win32evtlog.EVENTLOG_SEQUENTIAL_READ
+
+    # Conjunto de registros.
+    registros = set()
+
+    # Obtener todos los registros de eventos.
+    for registro in win32evtlog.ReadEventLog(manejador, flags, 0):
+        nombre = registro.SourceName
+        fecha = registro.TimeWritten.date()
+
+        # Comprobar que la entrada está dentro del rango de fechas.
+        if inicio.date() <= fecha <= final.date():
+            registros.add((fecha, nombre))
+
+    return registros
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 
@@ -441,3 +468,12 @@ if __name__ == "__main__":
 
     for entrada in historial:
         print("\t" + entrada)
+
+    # Obtener el registro de eventos del sistema.
+    registros = eventos_sistema()
+
+    # Imprimir los registros de eventos.
+    print("Registros de eventos:")
+
+    for (fecha, nombre) in sorted(registros):
+        print("\t{}\t{}".format(fecha.strftime('%d-%m-%Y'), nombre))
