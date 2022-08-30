@@ -465,7 +465,7 @@ if __name__ == "__main__":
     cambios = cambios_ramas_registro()
 
     # Imprimir los cambios en las ramas de registro.
-    print("Cambios en las ramas de registro:")
+    print("\nCambios en las ramas de registro:")
 
     for cambio in cambios:
         print("\t" + cambio)
@@ -474,7 +474,7 @@ if __name__ == "__main__":
     recientes = archivos_recientes(inicio, final)
 
     # Imprimir los archivos recientes.
-    print("Archivos recientes:")
+    print("\nArchivos recientes:")
 
     for reciente in recientes:
         print("\t" + reciente)
@@ -483,7 +483,7 @@ if __name__ == "__main__":
     temporales = archivos_temporales(inicio, final)
 
     # Imprimir los archivos temporales.
-    print("Archivos temporales:")
+    print("\nArchivos temporales:")
 
     for temporal in temporales:
         print("\t" + temporal)
@@ -492,7 +492,7 @@ if __name__ == "__main__":
     abiertos = programas_abiertos()
 
     # Imprimir los programas abiertos.
-    print("Programas (procesos) abiertos:")
+    print("\nProgramas (procesos) abiertos:")
 
     for programa in abiertos:
         print("\t" + programa)
@@ -501,21 +501,21 @@ if __name__ == "__main__":
     instalados, misteriosos = programas_instalados(inicio, final)
 
     # Imprimir los programas instalados.
-    print("Programas instalados:")
+    print("\nProgramas instalados:")
 
     for (fecha, nombre) in sorted(instalados):
         print("\t{}\t{}".format(fecha.strftime('%d-%m-%Y'), nombre))
 
-    print("Programas instalados que no se sabe la fecha:")
+    print("\n\tProgramas instalados que no se sabe la fecha:")
 
     for nombre in misteriosos:
-        print("\t" + nombre)
+        print("\t\t" + nombre)
 
     # Obtener el historial de navegación en un rango de fechas.
     historial = historial_navegacion(inicio, final)
 
     # Imprimir el historial de navegación.
-    print("Historial de navegación:")
+    print("\nHistorial de navegación:")
 
     for entrada in historial:
         print("\t" + entrada)
@@ -538,7 +538,7 @@ if __name__ == "__main__":
     registros = eventos_sistema()
 
     # Imprimir los registros de eventos.
-    print("Registros de eventos:")
+    print("\nRegistros de eventos:")
 
     for (fecha, nombre) in sorted(registros):
         print("\t{}\t{}".format(fecha.strftime('%d-%m-%Y'), nombre))
