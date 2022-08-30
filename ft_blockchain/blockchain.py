@@ -183,7 +183,7 @@ class Blockchain(object):
             bloque = cadena[indice]
 
             # Verificar que el bloque anterior es el correcto.
-            if bloque['anterior'] != ultimo_bloque['hash']:
+            if bloque['anterior'] != ultimo_bloque['prueba']:
                 return False
 
             # Verificar que el hash del bloque es correcto.
@@ -216,12 +216,12 @@ class Blockchain(object):
         for n in nodos:
             try:
                 # Crear una petición de la cadena al nodo.
-                peticion = requests.get(f'http://{n}/chain').json()     # Parseado a JSON.
+                peticion = requests.get(f'http://{n}/chain')
 
                 if peticion.status_code == 200:
 
                     # Obtener la cadena del nodo.
-                    cadena_nodo = peticion['cadena']
+                    cadena_nodo = peticion.json()['cadena']
 
                     # Comprobar si la cadena recibida es válida y más larga.
                     if self.validar_cadena(cadena_nodo) and len(cadena_max) < len(cadena_nodo):

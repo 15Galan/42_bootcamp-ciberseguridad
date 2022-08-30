@@ -98,7 +98,7 @@ def registrar_nodo():
         return jsonify({'error': 'La petición no tiene nodo.'}), 400
 
     # Agregar el nodo a la cadena de bloques.
-    b.agregar_nodo(valores['nodo'])
+    b.crear_nodo(valores['nodo'])
 
     # Respuesta de la petición HTTP.
     respuesta = {
