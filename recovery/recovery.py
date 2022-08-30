@@ -372,6 +372,56 @@ def historial_navegacion(inicio, final):
 
 
 def dispositivos_conectados():
+    """
+    Obtiene información sobre los dispositivos conectados al sistema en este momento.
+    Se entiende por "dispositivo" los medios extraíbles y las unidades físicas y lógicas.
+
+    :return: Lista de dispositivos conectados.
+    """
+
+    def unidades_fisicas():
+        # Conjunto de dispositivos conectados.
+        dispositivos = set()
+
+        # Obtener todos los dispositivos conectados.
+        if not conexion.Win32_PhysicalMedia():
+            print("\033[0;33mNo se han encontrado dispositivos físicos conectados.\033[0m")
+
+        else:
+            for dispositivo in conexion.Win32_PhysicalMedia():
+                if dispositivo.Name is not None:
+                    dispositivos.add(dispositivo.Name)
+
+        return dispositivos
+
+    def medios_extraibles():
+        # Conjunto de dispositivos conectados.
+        dispositivos = set()
+
+        # Obtener todos los dispositivos conectados.
+        if not conexion.Win32_CDROMDrive():
+            dispositivos.add("\033[0;33mNo se han encontrado dispositivos CDROMs conectados\033[0m")
+
+        else:
+            for dispositivo in conexion.Win32_CDROMDrive():
+                if dispositivo.Name is not None:
+                    dispositivos.add(dispositivo.Name)
+
+        # Obtener todos los USBs conectados.
+        if not conexion.Win32_USBController():
+            dispositivos.add("\033[0;33mNo se han encontrado dispositivos USBs conectados\033[0m")
+
+        else:
+            for dispositivo in conexion.Win32_USBController():
+                if dispositivo.Name is not None:
+                    dispositivos.add(dispositivo.Name)
+
+        return dispositivos
+
+    # Conjunto total de dispositivos conectados.
+    return unidades_fisicas().union(medios_extraibles())
+
+
 def eventos_sistema():
     """
     Obtiene los registros de eventos del sistema.
@@ -396,6 +446,7 @@ def eventos_sistema():
             registros.add((fecha, nombre))
 
     return registros
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -468,6 +519,20 @@ if __name__ == "__main__":
 
     for entrada in historial:
         print("\t" + entrada)
+
+    # Obtener los dispositivos conectados en este momento.
+    dispositivos = dispositivos_conectados()
+
+    # Imprimir los dispositivos conectados.
+    print("\nDispositivos conectados:")
+
+    if dispositivos:
+        for dispositivo in dispositivos:
+            print("\t" + dispositivo)
+
+    else:
+        # Mostrar en amarillo que no hay dispositivos conectados.
+        print("\t\033[0;33mNo hay dispositivos conectados\033[0m")
 
     # Obtener el registro de eventos del sistema.
     registros = eventos_sistema()
