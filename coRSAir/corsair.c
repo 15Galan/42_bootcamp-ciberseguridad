@@ -120,5 +120,71 @@ int main(int argc, char *argv[]) {
 
     privada = RSA_new();
 
+    // Cálculos para obtener los datos
+    n1 = (BIGNUM*) RSA_get0_n(rsa1);    // Obtener 'n' del certificado 1
+    n2 = (BIGNUM*) RSA_get0_n(rsa2);    // Obtener 'n' del certificado 2
+    e = (BIGNUM*) RSA_get0_e(rsa1);     // Obtener 'e' del certificado 1
+
+    BN_gcd(p, n1, n2, ctx);             // Obtener 'p' común a los dos certificados
+    BN_div(q1, NULL, n1, p, ctx);       // Obtener 'q' del certificado 1
+    BN_div(q2, NULL, n2, p, ctx);       // Obtener 'q' del certificado 2
+
+    BN_dec2bn(&one, "1");               // Inicializar 'one' a '1'
+    BN_sub(fi1, q1, one);               // Calcular 'fi1' = 'q1' - '1'
+    BN_sub(fi2, p, one);                // Calcular 'fi2' = 'p' - '1'
+    BN_mul(total, fi1, fi2, ctx);       // Calcular 'total' = 'fi1' * 'fi2'
+    BN_mod_inverse(d, e, total, ctx);   // Calcular 'd' = 'e' ^ -1 (mod 'total')
+
+    // Generar la clave privada
+    RSA_set0_key(privada, n1, e, d);
+
+    // Asociar los números primos a cada RSA
+    RSA_set0_factors(rsa1, p, q1);
+    RSA_set0_factors(rsa2, p, q2);
+
+    // Imprimir los datos de los certificados
+    printf("Clave pública - Certificado 1:\n");
+    RSA_print(bioprint, rsa1, 0);
+
+    printf("Clave privada - Certificado 1:\n");
+    RSA_print(bioprint, privada, 0);
+
+    printf("Clave pública - Certificado 2:\n");
+    RSA_print(bioprint, rsa2, 0);
+
+    printf("Clave privada - Certificado 2:\n");
+    RSA_print(bioprint, privada, 0);
+
+    // Leer el archivo de entrada
+    printf("Texto encriptado:\n");
+    printf("%s\n", res);
+
+    printf("Texto desencriptado:\n");
+    printf("%s\n", sol);
+
+    // Liberar la memoria
+    free(res);
+    free(sol);
+
+    BN_CTX_free(ctx);
+    BIO_free(bioprint);
+
+    RSA_free(rsa1);
+    RSA_free(rsa2);
+    RSA_free(privada);
+
+    BN_free(one);
+    BN_free(n1);
+    BN_free(q1);
+    BN_free(n2);
+    BN_free(q2);
+
+    BN_free(p);
+    BN_free(d);
+
+    BN_free(total);
+    BN_free(fi1);
+    BN_free(fi2);
+
     return 0;
 }
