@@ -146,20 +146,21 @@ int main(int argc, char *argv[]) {
     RSA_set0_factors(rsa2, p, q2);
 
     // Mostrar los datos de los certificados
-    printf("Clave pública - Certificado 1:\n");
+    printf("\nCERTIFICADO 1:\n");
     RSA_print(bioprint, rsa1, 0);
-
-    printf("Clave privada - Certificado 1:\n");
     RSA_print(bioprint, privada, 0);
 
-    printf("Clave pública - Certificado 2:\n");
+    printf("\nCERTIFICADO 2:\n");
     RSA_print(bioprint, rsa2, 0);
-
-    printf("Clave privada - Certificado 2:\n");
     RSA_print(bioprint, privada, 0);
 
-    // Leer el archivo de entrada
-    printf("Texto encriptado:\n");
+    // Leer el archivo de entrada y descifrar su contenido
+    fd = open(argv[3], O_RDONLY);
+    len = read(fd, res, BUFFER);
+    RSA_private_decrypt(len, res, sol, privada, RSA_PKCS1_PADDING);
+
+    // Mostrar los datos del fichero
+    printf("\nTexto encriptado:\n");
     printf("%s\n", res);
 
     printf("Texto desencriptado:\n");
@@ -171,10 +172,6 @@ int main(int argc, char *argv[]) {
 
     BN_CTX_free(ctx);
     BIO_free(bioprint);
-
-    RSA_free(rsa1);
-    RSA_free(rsa2);
-    RSA_free(privada);
 
     BN_free(one);
     BN_free(n1);
