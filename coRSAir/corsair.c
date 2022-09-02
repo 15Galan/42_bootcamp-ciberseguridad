@@ -8,16 +8,17 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
 
 // Librerías necesarias para este proyecto (OpenSSL)
-#include <openssl/bn.h>
-#include <openssl/rsa.h>
-#include <openssl/bio.h>
-#include <openssl/evp.h>
-#include <openssl/pem.h>
-#include <openssl/x509.h>
+#include "openssl/bn.h"
+#include "openssl/rsa.h"
+#include "openssl/bio.h"
+#include "openssl/evp.h"
+#include "openssl/pem.h"
+#include "openssl/x509.h"
 
 #define BUFFER 1024
 
@@ -95,6 +96,8 @@ int main(int argc, char *argv[]) {
     int fd;             // Descriptor del archivo de entrada
     int len;            // Longitud del archivo de entrada
 
+    (void) argc;        // Ignorar el parámetro 'argc'
+
     // Inicializar las variables
     res = malloc(sizeof(unsigned char) * BUFFER);
     sol = malloc(sizeof(unsigned char) * BUFFER);
@@ -142,7 +145,7 @@ int main(int argc, char *argv[]) {
     RSA_set0_factors(rsa1, p, q1);
     RSA_set0_factors(rsa2, p, q2);
 
-    // Imprimir los datos de los certificados
+    // Mostrar los datos de los certificados
     printf("Clave pública - Certificado 1:\n");
     RSA_print(bioprint, rsa1, 0);
 
@@ -181,6 +184,7 @@ int main(int argc, char *argv[]) {
 
     BN_free(p);
     BN_free(d);
+    BN_free(e);
 
     BN_free(total);
     BN_free(fi1);
