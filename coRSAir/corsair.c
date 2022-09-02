@@ -23,12 +23,50 @@
 
 
 /**
+ * Cargar un certificado RSA desde un archivo.
+ *
+ * @param fichero   Ruta del archivo.
+ *
+ * @return  Clave RSA cargada.
+ */
+RSA *obtener_rsa(char *fichero) {
+    // Definir las variables
+    X509 *cert;                 // Certificado
+    EVP_PKEY *pkey;             // Clave pública
+    RSA *rsa;                   // Clave RSA
+    BIO *bio;                   // Buffer de entrada
+    int correcto;               // Indicador de lectura correcta
+
+    // Inicializar las variables
+    bio = BIO_new(BIO_s_file());                    // Crear el buffer de entrada
+    correcto = BIO_read_filename(bio, fichero);     // Abrir el archivo
+
+    // Comprobar que el fichero se leyó correctamente
+    if (correcto != 1) {
+        printf("Error al leer el fichero '%s'.\n", fichero);
+        exit(1);
+    }
+
+    // Leer el certificado
+    cert = PEM_read_bio_X509(bio, NULL, 0, NULL);   // Leer el certificado
+    pkey = X509_get_pubkey(cert);                   // Obtener la clave pública
+    rsa = EVP_PKEY_get1_RSA(pkey);                  // Obtener la clave RSA
+
+    // Liberar la memoria
+    X509_free(cert);        // Liberar el certificado
+    EVP_PKEY_free(pkey);    // Liberar la clave pública
+    BIO_free(bio);          // Liberar el buffer de entrada
+
+    return rsa;
+}
+
+/**
  * Método principal.
  *
  * @return  0 si correcto.
  */
 int main(int argc, char *argv[]) {
-    // Definir las variables necesarias para el programa
+    // Definir las variables
     unsigned char *res;     // Buffer para los resultados
     unsigned char *sol;     // Buffer para la solución
 
@@ -65,8 +103,8 @@ int main(int argc, char *argv[]) {
 
     bioprint = BIO_new_fp(stdout, BIO_NOCLOSE);
 
-    // Obtener RSA 1
-    // Obtener RSA 2
+    rsa1 = obtener_rsa(argv[1]);
+    rsa2 = obtener_rsa(argv[2]);
 
     one = BN_new();
 
