@@ -1,0 +1,3 @@
+[submodule "inquisitor"]
+	path = inquisitor
+	url = https://github.com/ernestomgz/MITM.git
