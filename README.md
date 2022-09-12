@@ -1,4 +1,4 @@
-[![GitHub Banner Generator – Generate a GitHub banner for your repo!](Banner.svg)](https://15Galan/42malaga_bootcamp-ciberseguridad)
+[![GitHub Banner Generator – Generate a GitHub banner for your repo!](Banner.png)](https://15Galan/42malaga_bootcamp-ciberseguridad)
 
 Este evento tuvo lugar durante los días **11-07-2022** y **02-09-2022**, un total de **8 semanas**
 intensivas donde aprendí y desarrollé mis capacidades sobre la ciberseguridad.
