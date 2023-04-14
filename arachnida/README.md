@@ -2,27 +2,25 @@
 
 Los **metadatos** son información que se utiliza para describir otros datos; esencialmente, son **datos sobre datos**.
 
-Frecuentemente, se utilizan en imágenes y documentos, **pudiendo llegar a revelar información sensible** de quienes lo han
-creado o manipulado.
+Se utilizan frecuentemente en imágenes y documentos, **pudiendo llegar a revelar información sensible** de quienes lo han creado o manipulado.
 
 
 # Objetivo
 
-Crear 2 instrumentos (`spider` y `scorpion`) que permitan extraer información de una web automáticamente y después
-analizarla para conocer o eliminar datos sensibles; ambos programas pueden ser scripts o binarios.
+Crear 2 instrumentos ($\texttt{spider}$ y $\texttt{scorpion}$) que permitan extraer información de una web automáticamente y después analizarla para conocer o eliminar datos sensibles; ambos programas pueden ser scripts o binarios.
 
-Pueden usarse funciones o librerías que permitan crear peticiones HTTP y manejar archivos, pero la lógica de cada
-programa debe estar desarrollada por mí; es decir, no pueden utilizarse `wget`, `scrapy`, ni librerías similares.
+Pueden usarse funciones o librerías que permitan crear peticiones HTTP y manejar archivos, pero la lógica de cada programa debe estar desarrollada por mí; es decir, no pueden utilizarse $\texttt{wget}$, $\texttt{scrapy}$, ni librerías similares.
+
 
 # Funcionamiento
 
-## `spider`
+## spider
+
 Este programa debe recibir como argumento una URL de la que extraerá las imágenes.
 
-```bash
-python3 spider.py -h
-```
-```
+```console
+$ python3 spider.py -h
+
 usage: spider.py [-h] [-r] [-l L] [-p P] [-v] [-e] [-o] URL
 
 Herramienta casera de Scraping de imágenes de un sitio web.
@@ -43,14 +41,16 @@ Ejercicio 'arachnida' del Bootcamp de Ciberseguridad de la Fundación 42 (Málag
 ```
 
 
-## `scorpion`
-Este programa debe recibir como argumento una o varias imágenes de las que extraerá sus metadatos.
-- Cabe destacar que, por lo general, las imágenes publicadas en internet carecen de metadatos por seguridad.
+## scorpion
 
-```bash
-python3 scorpion.py -h
-```
-```
+Este programa debe recibir como argumento una o varias imágenes de las que extraerá sus metadatos.
+
+> [!NOTE]
+> Normalmente, las imágenes publicadas en Internet carecen de metadatos por seguridad.
+
+```console
+$ python3 scorpion.py -h
+
 usage: scorpion.py [-h] IMAGEN [IMAGENES [IMAGENES ...]]
 
 Herramienta casera que muestra metadatos de imágenes.
